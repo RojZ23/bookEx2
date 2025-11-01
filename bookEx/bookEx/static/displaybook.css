@@ -1,0 +1,85 @@
+:root {
+ --brand-blue: #0d6efd;   /* table name row */
+ --row-blue:   #eaf2ff;   /* odd content rows */
+ --text-dark:  #1f2937;   /* body text */
+ --border:     #d1d5db;   /* cell borders */
+}
+
+* { box-sizing: border-box; }
+
+.card {
+ max-width: 980px;
+ margin: 0 auto;
+ background: #fff;
+ border: 1px solid #e5e7eb;
+ border-radius: 14px;
+ box-shadow: 0 6px 22px rgba(17,24,39,.06);
+ overflow: hidden;
+}
+
+.table-wrap {
+ width: 100%;
+ overflow-x: auto;
+}
+
+table {
+ width: 100%;
+ border-collapse: separate;
+ border-spacing: 0;
+ table-layout: fixed;
+ border: 1px solid var(--border);
+ border-left: 0;
+ border-right: 0;
+}
+
+/* Table name row */
+caption {
+ caption-side: top;
+ padding: 18px 20px;
+ background: var(--brand-blue);
+ color: #fff;
+ font-weight: 600;
+ font-size: 1.1rem;
+ text-align: center;
+ letter-spacing: .2px;
+}
+
+thead th {
+ background: #f3f4f6;
+ font-weight: 600;
+}
+
+thead th, tbody td {
+ border-top: 1px solid var(--border);
+ border-bottom: 1px solid var(--border);
+}
+
+th, td {
+ padding: 10px 12px;
+ text-align: left;
+ width: 160px;
+ height: 44px;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+/* zebra striping */
+tbody tr:nth-child(odd)  { background: var(--row-blue); }
+tbody tr:nth-child(even) { background: #fff; }
+
+/* subtle hover effect */
+tbody tr:hover {
+ filter: brightness(0.98);
+}
+
+tbody tr td:first-child, thead tr th:first-child { border-left: 1px solid var(--border); }
+tbody tr td:last-child,  thead tr th:last-child  { border-right: 1px solid var(--border); }
+
+/* responsive tweak */
+@media (max-width: 540px) {
+ th, td {
+   white-space: normal;
+   height: auto;
+ }
+}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block sidenav %}
+<ul class="nav flex-column p-3 bg-light">
+  {% for item in item_list %}
+  <li class="nav-item mb-2">
+    <a class="nav-link text-dark" href="{{ item.link }}">{{ item.item }}</a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock sidenav %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-3">{{ book.name }}</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <img src="{% static book.pic_path %}" alt="Book Picture" class="img-fluid rounded border">
+    </div>
+    <div class="col-md-8">
+      <p><strong>Price:</strong> ${{ book.price }}</p>
+      <p><strong>Posted by:</strong> {{ book.username }}</p>
+      <p><strong>Date:</strong> {{ book.publishdate }}</p>
+      <p><strong>Website:</strong> <a href="{{ book.web }}" target="_blank">{{ book.web }}</a></p>
+
+      <a href="{% url 'rate_book' book.id %}" class="btn btn-warning mt-3">Rate this Book</a>
+      <a href="{% url 'searchbooks' %}" class="btn btn-secondary mt-3 ms-2">Back to Search</a>
+
+      {% if user.is_authenticated %}
+        {% if user in book.favorites.all %}
+          <a href="{% url 'toggle_favorite' book.id %}" class="btn btn-danger mt-3 ms-2">Remove from Favorites</a>
+        {% else %}
+          <a href="{% url 'toggle_favorite' book.id %}" class="btn btn-outline-primary mt-3 ms-2">Add to Favorites</a>
+        {% endif %}
+      {% endif %}
+
+      <h3 class="mt-4">Ratings</h3>
+      {% if ratings %}
+        <p><strong>Average Rating:</strong> {{ avg_rating|default:"No ratings yet" }}</p>
+        <ul class="list-group">
+          {% for rate in ratings %}
+            <li class="list-group-item">
+              <strong>
+                {% if rate.user == user %}
+                  You
+                {% else %}
+                  Anonymous
+                {% endif %}
+              </strong>
+              : {{ rate.rating }} / 5
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No ratings yet. Be the first to <a href="{% url 'rate_book' book.id %}">rate this book</a>.</p>
+      {% endif %}
+
+      <h3 class="mt-4">Comments</h3>
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_comment' book.id %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <textarea name="content" class="form-control" rows="3" placeholder="Add your comment here" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary mb-3">Submit Comment</button>
+        </form>
+      {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to add comments.</p>
+      {% endif %}
+
+      {% if book.comments.all %}
+        <ul class="list-group">
+          {% for comment in book.comments.all %}
+            <li class="list-group-item">
+              <strong>{{ comment.user.username }}</strong> <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+              <p>{{ comment.content }}</p>
+              {% if comment.user == user %}
+                <form method="post" action="{% url 'delete_comment' comment.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this comment?');">Delete</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No comments yet. Be the first to add one!</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Search Books</h1>
+
+  <form method="get" class="mb-3">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Book name" aria-label="Search books" value="{{ query|default:'' }}">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+
+  {% if books %}
+    <ul class="list-group">
+      {% for book in books %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+          <span class="badge bg-secondary rounded-pill">${{ book.price }}</span>
+        </li>
+      {% empty %}
+        <li class="list-group-item">No books found.</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock content %}

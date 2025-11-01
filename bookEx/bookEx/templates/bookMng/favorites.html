@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block sidenav %}
+<ul class="nav flex-column p-3 bg-light">
+  {% for item in item_list %}
+  <li class="nav-item mb-2">
+    <a class="nav-link text-dark" href="{{ item.link }}">{{ item.item }}</a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock sidenav %}
+
+{% block content %}
+<h1>Your Favorite Books</h1>
+{% if favorites %}
+  <ul class="list-group">
+    {% for book in favorites %}
+      <li class="list-group-item">
+        <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You have no favorite books yet.</p>
+{% endif %}
+{% endblock content %}

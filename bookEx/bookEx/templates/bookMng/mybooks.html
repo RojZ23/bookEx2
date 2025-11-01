@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+<h2>Books You Posted</h2>
+{% if posted_books %}
+  <ul class="list-group mb-4">
+    {% for book in posted_books %}
+      <li class="list-group-item">
+        <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You haven't posted any books yet.</p>
+{% endif %}
+
+<h2>Books You Purchased</h2>
+{% if purchased_books %}
+  <ul class="list-group mb-4">
+    {% for book in purchased_books %}
+      <li class="list-group-item">
+        <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You haven't purchased any books yet.</p>
+{% endif %}
+
+<h2>Your Favorite Books</h2>
+{% if favorite_books %}
+  <ul class="list-group">
+    {% for book in favorite_books %}
+      <li class="list-group-item">
+        <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You have no favorite books yet.</p>
+{% endif %}
+{% endblock content %}

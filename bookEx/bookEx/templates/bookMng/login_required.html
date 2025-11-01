@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <div class="alert alert-warning mt-4" role="alert">
+    <h4 class="alert-heading">Attention</h4>
+    <p>{{ message }}</p>
+  </div>
+{% endblock content %}

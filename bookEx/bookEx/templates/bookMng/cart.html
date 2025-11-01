@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h2>Your Shopping Cart</h2>
+
+  {% if cart_items %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Book</th>
+          <th>Quantity</th>
+          <th>Price per Unit</th>
+          <th>Total Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+          <tr>
+            <td><a href="{% url 'book_detail' item.book.id %}">{{ item.book.name }}</a></td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.book.price }}</td>
+            <td>${{ item.quantity|mul:item.book.price }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-end">
+      <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+    </div>
+
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
+{% endblock content %}

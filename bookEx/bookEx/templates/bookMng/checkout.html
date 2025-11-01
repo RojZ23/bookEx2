@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h2>Checkout Confirmation</h2>
+
+  {% if cart_items %}
+    <p>Are you sure you want to checkout the following items?</p>
+
+    <ul class="list-group mb-3">
+      {% for item in cart_items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ item.book.name }} (Quantity: {{ item.quantity }})
+          <span class="badge bg-secondary rounded-pill">${{ item.book.price }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">Confirm Checkout</button>
+      <a href="{% url 'cart' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
+{% endblock content %}
