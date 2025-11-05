@@ -8,8 +8,8 @@
         margin: 0 auto;
         padding: 20px;
         display: grid;
-        grid-template-columns: repeat(3, 1fr); /* three equal columns */
-        column-gap: 60px; /* add enough space */
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 60px;
         align-items: start;
     "
 >
@@ -22,7 +22,7 @@
         font-size: 1.8rem;
         color: var(--primary);
         margin-bottom: 25px;
-        white-space: nowrap; /* prevent wrapping */
+        white-space: nowrap;
     ">
         Books You Posted
     </h2>
@@ -33,7 +33,7 @@
         font-size: 1.8rem;
         color: var(--primary);
         margin-bottom: 25px;
-        white-space: nowrap; /* prevent wrapping */
+        white-space: nowrap;
     ">
         Books You Purchased
     </h2>
@@ -44,7 +44,7 @@
         font-size: 1.8rem;
         color: var(--primary);
         margin-bottom: 25px;
-        white-space: nowrap; /* prevent wrapping */
+        white-space: nowrap;
     ">
         Your Favorite Books
     </h2>
@@ -156,9 +156,10 @@
                 box-shadow: var(--shadow);
                 min-height: 110px;
                 display: flex;
+                justify-content: center;
                 align-items: center;
-                justify-content: flex-end;
                 gap: 16px;
+                width: 100%;
             ">
                 <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.05rem; text-decoration: none;">
                     {{ book.name }}
@@ -173,6 +174,7 @@
         </p>
         {% endif %}
     </div>
+
 
 </section>
 {% endblock content %}
