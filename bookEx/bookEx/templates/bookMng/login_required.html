@@ -7,8 +7,22 @@
 {% endblock sidenav %}
 
 {% block content %}
-  <div class="alert alert-warning mt-4" role="alert" style="max-width: 700px; margin: 2rem auto; padding: 1.3rem 2rem; border-radius: 12px; box-shadow: var(--shadow); font-size: 1.1rem; color: #856404; background-color: #fff3cd; border-color: #ffeeba;">
-    <h4 class="alert-heading" style="font-weight: 700; margin-bottom: 0.75rem;">Attention</h4>
-    <p style="margin-bottom: 0;">{{ message }}</p>
+<div style="max-width: 700px; margin: 2rem auto; display: flex; gap: 2rem; background: #fff3cd; border-radius: 12px; box-shadow: var(--shadow); padding: 2rem; color: #856404; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+  <!-- Left Image -->
+  <div style="flex: 1 1 40%; display: flex; justify-content: center; align-items: center;">
+    <img src="https://ih1.redbubble.net/image.5308154627.2407/st,small,507x507-pad,600x600,f8f8f8.jpg" alt="Attention Illustration" style="max-width: 100%; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
   </div>
+
+  <!-- Right Alert Content -->
+  <div style="flex: 1 1 60%;">
+    <h4 style="display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.8rem; margin-bottom: 1rem;">
+      <i class="fas fa-exclamation-circle" style="font-size: 2.4rem; color: #856404;"></i>
+      Attention
+    </h4>
+    <p style="margin: 0; font-size: 1.2rem; line-height: 1.5;">
+      {{ message }}
+    </p>
+  </div>
+</div>
 {% endblock content %}
