@@ -25,10 +25,16 @@ from django.shortcuts import get_object_or_404, redirect
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
 
-@login_required
 def postbook(request):
-    # Check if user belongs to Publisher or Writer group
-    if not request.user.groups.filter(name__in=['Publisher', 'Writer']).exists():
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to post a book.',
+            'item_list': MainMenu.objects.all(),
+        })
+
+    # Assuming you still want to check user role here (Publisher or Writer)
+    profile = getattr(request.user, 'userprofile', None)
+    if not profile or profile.role not in ['Publisher', 'Writer']:
         return render(request, 'permission_denied.html', status=403)
 
     submitted = False
@@ -39,7 +45,6 @@ def postbook(request):
             book.username = request.user
             book.save()
             submitted = True
-            return redirect('/postbook?submitted=True')
     else:
         form = BookForm()
         if 'submitted' in request.GET:
@@ -47,8 +52,8 @@ def postbook(request):
 
     return render(request, 'bookMng/postbook.html', {
         'form': form,
+        'submitted': submitted,
         'item_list': MainMenu.objects.all(),
-        'submitted': submitted
     })
 
 def displaybooks(request):
@@ -252,8 +257,13 @@ def view_cart(request):
         item.book.pic_path = item.book.picture.url.split('/static/')[-1]
     return render(request, 'bookMng/cart.html', {'item_list': MainMenu.objects.all(), 'cart_items': cart_items})
 
-@login_required
 def checkout(request):
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to access the checkout.',
+            'item_list': MainMenu.objects.all(),
+        })
+
     if request.method == 'POST':
         ShoppingCart.objects.filter(user=request.user, checked_out=False).update(checked_out=True)
         return redirect('mybooks')
@@ -368,26 +378,6 @@ def return_book(request, book_id):
         'available_to_return': available_to_return,
     })
 
-@login_required
-def postbook(request):
-    profile = getattr(request.user, 'userprofile', None)
-    if not profile or profile.role not in ['Publisher', 'Writer']:
-        return render(request, 'permission_denied.html', status=403)
-
-    submitted = False
-    if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES)
-        if form.is_valid():
-            book = form.save(commit=False)
-            book.username = request.user
-            book.save()
-            submitted = True
-    else:
-        form = BookForm()
-        if 'submitted' in request.GET:
-            submitted = True
-
-    return render(request, 'postbook.html', {'form': form, 'submitted': submitted})
 
 @group_required('Publisher', 'Writer')
 def edit_book(request, book_id):
