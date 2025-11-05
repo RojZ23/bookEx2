@@ -81,8 +81,12 @@
       </form>
     </div>
 
-  {% else %}
-  <p style="font-style: italic; color: var(--text-secondary); font-size: 1.1rem; text-align: center;">Your cart is empty.</p>
-  {% endif %}
+{% else %}
+<div style="max-width: 400px; margin: 4rem auto; text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.3rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <img src="https://media.istockphoto.com/id/861576608/vector/empty-shopping-bag-icon-online-business-vector-icon-template.jpg?s=612x612&w=0&k=20&c=I7MbHHcjhRH4Dy0NVpf4ZN4gn8FVDnwn99YdRW2x5k0=" alt="Empty cart icon" style="max-width: 240px; margin-bottom: 2rem; opacity: 0.75;">
+  <p>Your cart is empty.</p>
+</div>
+{% endif %}
+
 </div>
 {% endblock %}
