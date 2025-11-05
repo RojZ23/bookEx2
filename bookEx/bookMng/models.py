@@ -19,6 +19,7 @@ class Book(models.Model):
     pic_path = models.CharField(max_length=300, editable=False, blank=True)
     username = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     favorites = models.ManyToManyField(User, related_name='favorite_books', blank=True)
+    quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -52,3 +53,9 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user.username} on {self.book.name}'
+
+class BookReturn(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    returned_at = models.DateTimeField(auto_now_add=True)

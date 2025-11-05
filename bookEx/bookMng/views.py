@@ -12,6 +12,8 @@ from .models import ShoppingCart
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.db.models import Sum
+from django.contrib import messages
+from .models import BookReturn
 
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
@@ -58,7 +60,6 @@ def book_detail(request, book_id):
 
 def mybooks(request):
     if not request.user.is_authenticated:
-        # Your existing login required logic
         return render(request, 'bookMng/login_required.html', {
             'message': 'You need to login to view your books.',
             'item_list': MainMenu.objects.all(),
@@ -67,7 +68,22 @@ def mybooks(request):
     posted_books = Book.objects.filter(username=request.user)
     purchased_items = ShoppingCart.objects.filter(user=request.user, checked_out=True)
     purchased_books_quantities = purchased_items.values('book').annotate(total_quantity=Sum('quantity'))
-    purchased_books = Book.objects.filter(id__in=purchased_items.values_list('book_id', flat=True))
+
+    # Calculate returned quantities for user
+    returned_books_quantities = BookReturn.objects.filter(user=request.user).values('book').annotate(total_quantity=Sum('quantity'))
+    returned_quantities = {rq['book']: rq['total_quantity'] for rq in returned_books_quantities}
+
+    # Compute net purchased quantities = purchased - returned
+    purchased_quantities = {}
+    for pq in purchased_books_quantities:
+        book_id = pq['book']
+        net_qty = pq['total_quantity'] - returned_quantities.get(book_id, 0)
+        if net_qty > 0:
+            purchased_quantities[book_id] = net_qty
+
+    # Filter purchased_books to include only books with positive net quantity
+    purchased_books = Book.objects.filter(id__in=purchased_quantities.keys())
+
     favorite_books = request.user.favorite_books.all()
 
     for book in posted_books:
@@ -76,8 +92,6 @@ def mybooks(request):
         book.pic_path = book.picture.url.split('/static/')[-1]
     for book in favorite_books:
         book.pic_path = book.picture.url.split('/static/')[-1]
-
-    purchased_quantities = {pq['book']: pq['total_quantity'] for pq in purchased_books_quantities}
 
     return render(request, 'bookMng/mybooks.html', {
         'item_list': MainMenu.objects.all(),
@@ -215,3 +229,34 @@ def update_cart_quantity(request, book_id):
             except ValueError:
                 pass
         return redirect('checkout')
+
+@login_required
+def return_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+
+    # Get user's total purchased (exclude already returned)
+    purchased = ShoppingCart.objects.filter(
+        user=request.user, book=book, checked_out=True
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+    returned = BookReturn.objects.filter(
+        user=request.user, book=book
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+    available_to_return = purchased - returned
+
+    if request.method == "POST":
+        qty = int(request.POST.get("quantity", 0))
+        if 0 < qty <= available_to_return:
+            # Update inventory
+            book.quantity += qty     # Assumes Book has a quantity (inventory) field
+            book.save()
+            # Log the return
+            BookReturn.objects.create(user=request.user, book=book, quantity=qty)
+            messages.success(request, f"Successfully returned {qty} copy/copies of {book.name}.")
+        else:
+            messages.error(request, f"Invalid quantity: {qty}. You can return up to {available_to_return}.")
+        return redirect('mybooks')
+
+    return render(request, 'bookMng/return_book_form.html', {
+        'book': book,
+        'available_to_return': available_to_return,
+    })

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:500px;margin:2rem auto;background:var(--bg-secondary);padding:2rem;border-radius:8px;">
+    <h2>Return "{{ book.name }}"</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="quantity">How many copies do you want to return? (Available: {{ available_to_return }})</label>
+        <input type="number" name="quantity" min="1" max="{{ available_to_return }}" required>
+        <button type="submit" style="margin-top:1rem;background:var(--primary);color:white;padding:8px 26px;border-radius:8px;border:none;">Return</button>
+        <a href="{% url 'mybooks' %}" style="margin-left:10px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}
