@@ -1,0 +1,139 @@
+\documentclass[11pt]{article}
+
+% --- Packages ---
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}      % For images
+\usepackage{booktabs}      % Nicer tables
+\usepackage{enumitem}      % Tighter, consistent lists
+\usepackage{hyperref}      % Clickable refs/links
+\usepackage{microtype}     % Better typography
+\usepackage{xcolor}        % Colors for links
+
+% --- Hyperref setup ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=blue,
+  pdfauthor={Bryan Gonzalez, Kalen Hoang Tiana Luu, Janelle Rivera, Christine Vu, Rojina Zalzar},
+  pdftitle={Book Exchange Django Application - Development Document}
+}
+
+% --- Title Info ---
+\title{Book Exchange Django Application\\\large Development Document}
+\author{Bryan Gonzalez, Kalen Hoang Tiana Luu, Janelle Rivera, Christine Vu, Rojina Zalzar}
+\date{November 5, 2025}
+
+% --- List spacing ---
+\setlist{itemsep=0.25em, topsep=0.25em}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Overview}
+    The Book Exchange web application facilitates a community-driven platform where users can share, discover, and manage books. The primary audience is students and general users interested in exchanging books in an organized, interactive environment.
+
+\section{App Purpose and Features}
+
+\subsection{Core Functions}
+\begin{itemize}
+  \item \textbf{Book Listings and Details:} Browse posted books and view details including price, images, posting user, and external links.
+  
+  \item \textbf{User Registration \& Authentication:} New users can sign up; existing users can sign in to access interactive features.
+  
+  \item \textbf{Book Management:} Post books to share and manage personal postings.
+  
+  \item \textbf{Search:} Search for books by name to streamline discovery.
+  
+  \item \textbf{User-Centric Lists:} Personal views for posted, purchased, and favorited books.
+  
+\end{itemize}
+
+\subsection{Advanced Interactive Features}
+\begin{itemize}
+  \item \textbf{Ratings:} Rate books from 1--5 stars. Ratings are anonymous except for the current user’s own rating.
+  
+  \item \textbf{Favorites:} Add or remove books from a favorites list for quick access.
+  
+  \item \textbf{Comments:} Add comments on book detail pages; users may delete only their own comments.
+  
+  \item \textbf{Shopping Cart \& Checkout:} Add books to a cart and check out to mark items as purchased.
+  
+  \item \textbf{Access Control:} Views such as \emph{My Books} and \emph{Checkout} require login. Unauthorized access shows a friendly ``You need to log in'' message rather than redirecting.
+  
+\end{itemize}
+
+\subsection{Student Required Features}
+\begin{itemize}
+  \item \textbf{About Us Page:} A dedicated page describing the app’s purpose and development context.
+  
+  \item \textbf{Book Search:} Case-insensitive search by name with immediate results.
+  
+  \item \textbf{Navigation Reformat:} Responsive, user-friendly navigation bar styled with Bootstrap/CSS.
+  
+\end{itemize}
+
+\subsection{Chosen Additional Features}
+\begin{itemize}
+  \item \textbf{Message Box (Comments):} Users can add comments to books and manage their own comments.
+  
+  \item \textbf{Shopping Cart:} Add multiple books and manage purchases easily.
+  
+  \item \textbf{Ratings:} Star rating system on book detail pages for qualitative feedback.
+  
+\end{itemize}
+
+\subsection{Key Challenges and Solutions}
+\begin{itemize}
+  \item \textbf{Login Redirection 404:}
+  \emph{Problem:} Access to login-protected pages redirected to a non-existent \texttt{/accounts/login/}, causing 404 errors.\\
+  \emph{Solution:} Removed the default \texttt{@login\_required} redirect. Added manual \texttt{request.user.is\_authenticated} checks in views and rendered a custom login-required template.
+  
+  \item \textbf{Anonymous Ratings Display:}
+  \emph{Need:} Show ratings while preserving privacy.\\
+  \emph{Solution:} In templates, display ``You'' for the current user’s rating and ``Anonymous'' for others.
+
+  \item \textbf{Favorites Toggle:}
+  \emph{Need:} Seamless add/remove without confusion.\\
+  \emph{Solution:} Implemented a toggle button with conditional template rendering to switch between ``Add to Favorites'' and ``Remove from Favorites.''
+
+  \item \textbf{Comment Ownership \& Delete Control:}
+  \emph{Need:} Ensure users can delete only their own comments.\\
+  \emph{Solution:} Server-side authorization check in the delete view, returning \texttt{HttpResponseForbidden} on failure.
+  
+\end{itemize}
+
+\section{Summary of Implemented Requirements}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Requirement} & \textbf{Status} & \textbf{Notes} \\
+\midrule
+About Us & Completed & Informational page (includes CSULA logo image) \\
+Search a Book & Completed & Case-insensitive search by name \\
+Reformat Nav & Completed & Bootstrap/CSS responsive navigation bar \\
+Message Box (Comments) & Completed & Add/delete with ownership control \\
+Shopping Cart & Completed & Add to cart, view cart, checkout \\
+Ratings & Completed & 1--5 stars, anonymous display \\
+Favorite List & Completed & User-specific favorites with toggle \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Usage Flow for Users}
+\begin{itemize}
+  \item Visit the homepage to browse or search books.
+  \item Register or log in to access the full feature set.
+  \item Post books to share with others.
+  \item Add books to the shopping cart and check out.
+  \item Rate and comment on books.
+  \item Favorite/unfavorite books for quick access.
+  \item Manage personal lists (posted, purchased, favorites).
+  \item If not logged in, friendly reminder pages clarify when login is required.
+  
+\end{itemize}
+
+\end{document}
