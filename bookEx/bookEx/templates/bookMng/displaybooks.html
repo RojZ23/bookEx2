@@ -4,118 +4,113 @@
 {% block title %}Available Books - Book Exchange{% endblock %}
 
 {% block content %}
+
 <div class="displaybooks-container" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
 
-  <header class="page-header" style="margin-bottom: 2rem; text-align: center;">
-    <h1 style="font-weight: 800; font-size: 3rem; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); margin-bottom: 0.25rem; white-space: nowrap;">
-      Available Books
-    </h1>
-    <p style="color: var(--text-secondary); font-size: 1.15rem; font-weight: 500; margin-top: 0;">
-      Browse and add books to your cart seamlessly
-    </p>
-  </header>
+    <header class="page-header" style="margin-bottom: 2rem; text-align: center;">
+        <h1 style="font-weight: 800; font-size: 3rem; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); margin-bottom: 0.25rem; white-space: nowrap;">
+            Available Books
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.15rem; font-weight: 500; margin-top: 0;">
+            Browse and add books to your cart seamlessly
+        </p>
+    </header>
 
-  <div class="card" style="background: var(--bg-secondary); padding: 2rem; border-radius: 14px; box-shadow: var(--shadow);">
-    <div class="table-controls" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem 2rem; margin-bottom: 1.5rem;">
-      <div class="search-control" style="position: relative; flex: 1 1 280px; max-width: 320px;">
-        <i class="fas fa-search" style="color: var(--text-tertiary); position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"></i>
-        <input type="text" placeholder="Search books..." id="bookSearch" style="width: 100%; padding: 12px 18px 12px 40px; border-radius: 12px; border: 1px solid var(--border); font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-shadow: none;"
-          onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 8px var(--primary)';"
-          onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='none';"
-        >
-      </div>
-      <div class="results-count" style="color: var(--text-secondary); font-size: 1rem; font-weight: 600; flex: 0 0 auto;">
-        {{ books|length }} book{{ books|length|pluralize }} available
-      </div>
+    <div class="card" style="background: var(--bg-secondary); padding: 2rem; border-radius: 14px; box-shadow: var(--shadow);">
+        <div class="table-controls" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem 2rem; margin-bottom: 1.5rem;">
+            <div class="search-control" style="position: relative; flex: 1 1 280px; max-width: 320px;">
+                <i class="fas fa-search" style="color: var(--text-tertiary); position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" placeholder="Search books..." id="bookSearch" style="width: 100%; padding: 12px 18px 12px 40px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem; outline: none; transition: border-color 0.25s ease;">
+            </div>
+            <div class="results-count" style="color: var(--text-secondary); font-size: 1rem; font-weight: 600; flex: 0 0 auto;">
+                {{ books|length }} book{{ books|length|pluralize }} available
+            </div>
+        </div>
+
+        <div class="table-wrap" style="overflow-x: auto;">
+            <table class="book-table" aria-label="Books Available for Exchange" style="width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; table-layout: fixed;">
+                <thead>
+                    <tr style="background: var(--bg-primary); border-bottom: 3px solid var(--border);">
+                        <th style="padding: 16px 20px; text-align: left; font-weight: 700; color: var(--primary); border-radius: 12px 0 0 12px;">Book Name</th>
+                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Price</th>
+                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Posted By</th>
+                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center; border-radius: 0 12px 12px 0;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr class="book-row" style="background: var(--bg-secondary); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease; border-radius: 12px; cursor: pointer;">
+                        <td style="padding: 16px 20px; vertical-align: middle;">
+                            <a href="{% url 'book_detail' book.id %}" class="book-link" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-book book-icon" style="color: var(--text-tertiary); font-size: 1.25rem;"></i>
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ book.name }}</span>
+                            </a>
+                        </td>
+                        <td class="price" style="padding: 16px 20px; text-align: center; font-weight: 700; vertical-align: middle;">${{ book.price }}</td>
+                        <td class="posted-by" style="padding: 16px 20px; color: var(--text-secondary); text-align: center; vertical-align: middle;">{{ book.username }}</td>
+                        <td style="padding: 16px 20px; text-align: center; vertical-align: middle;">
+                            <a href="{% url 'add_to_cart' book.id %}" class="add-to-cart-btn"
+                               style="background-color: #28a745;
+                                      color: white;
+                                      padding: 12px 24px;
+                                      border-radius: 14px;
+                                      font-weight: 700;
+                                      text-decoration: none;
+                                      box-shadow: 0 6px 15px rgba(40, 167, 69, 0.6);
+                                      display: inline-flex;
+                                      align-items: center;
+                                      gap: 10px;
+                                      transition: background-color 0.3s ease, box-shadow 0.3s ease;">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 24px; text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.1rem;">
+                            <i class="fas fa-book-open" style="margin-right: 10px;"></i> No books available at the moment.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if books.has_other_pages %}
+        <nav class="pagination" aria-label="Pagination navigation" style="display: flex; justify-content: center; gap: 16px; margin-top: 24px;">
+            {% if books.has_previous %}
+                <a href="?page={{ books.previous_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            {% endif %}
+
+            <span class="page-info" style="line-height: 38px; color: var(--text-secondary); font-weight: 600; font-size: 1rem;">
+                Page {{ books.number }} of {{ books.paginator.num_pages }}
+            </span>
+
+            {% if books.has_next %}
+                <a href="?page={{ books.next_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </nav>
+        {% endif %}
     </div>
-
-    <div class="table-wrap" style="overflow-x: auto;">
-      <table class="book-table" aria-label="Books Available for Exchange" style="width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; table-layout: fixed; font-size: 1rem;">
-        <thead>
-          <tr style="background: var(--bg-primary); border-bottom: 3px solid var(--border);">
-            <th style="padding: 16px 20px; text-align: left; font-weight: 700; color: var(--primary); border-radius: 12px 0 0 12px;">Book Name</th>
-            <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Price</th>
-            <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Posted By</th>
-            <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center; border-radius: 0 12px 12px 0;">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for book in books %}
-          <tr class="book-row" style="background: var(--bg-secondary); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease; border-radius: 12px; cursor: pointer;">
-            <td style="padding: 16px 20px; vertical-align: middle;">
-              <a href="{% url 'book_detail' book.id %}" class="book-link" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px;">
-                <i class="fas fa-book book-icon" style="color: var(--text-tertiary); font-size: 1.25rem;"></i>
-                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ book.name }}</span>
-              </a>
-            </td>
-            <td class="price" style="padding: 16px 20px; text-align: center; font-weight: 700; vertical-align: middle;">${{ book.price }}</td>
-            <td class="posted-by" style="padding: 16px 20px; color: var(--text-secondary); text-align: center; vertical-align: middle;">{{ book.username }}</td>
-            <td style="padding: 16px 20px; text-align: center; vertical-align: middle;">
-              <a href="{% url 'add_to_cart' book.id %}" class="add-to-cart-btn"
-                style="background-color: #28a745;
-                       color: white;
-                       padding: 12px 24px;
-                       border-radius: 14px;
-                       font-weight: 700;
-                       text-decoration: none;
-                       box-shadow: 0 6px 15px rgba(40, 167, 69, 0.6);
-                       display: inline-flex;
-                       align-items: center;
-                       gap: 10px;
-                       transition: background-color 0.3s ease, box-shadow 0.3s ease;"
-                onmouseover="this.style.backgroundColor='#218838'; this.style.boxShadow='0 8px 20px rgba(30, 150, 40, 0.7)';"
-                onmouseout="this.style.backgroundColor='#28a745'; this.style.boxShadow='0 6px 15px rgba(40, 167, 69, 0.6)';">
-                <i class="fas fa-cart-plus"></i> Add to Cart
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="4" style="padding: 24px; text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.1rem;">
-              <i class="fas fa-book-open" style="margin-right: 10px;"></i> No books available at the moment.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    {% if books.has_other_pages %}
-    <nav class="pagination" aria-label="Pagination navigation" style="display: flex; justify-content: center; gap: 16px; margin-top: 24px;">
-      {% if books.has_previous %}
-        <a href="?page={{ books.previous_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
-          <i class="fas fa-chevron-left"></i>
-        </a>
-      {% endif %}
-
-      <span class="page-info" style="line-height: 38px; color: var(--text-secondary); font-weight: 600; font-size: 1rem;">
-        Page {{ books.number }} of {{ books.paginator.num_pages }}
-      </span>
-
-      {% if books.has_next %}
-        <a href="?page={{ books.next_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
-          <i class="fas fa-chevron-right"></i>
-        </a>
-      {% endif %}
-    </nav>
-    {% endif %}
-
-  </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('bookSearch');
-  const bookRows = document.querySelectorAll('.book-row');
+    const searchInput = document.getElementById('bookSearch');
+    const bookRows = document.querySelectorAll('.book-row');
 
-  searchInput.addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
 
-    bookRows.forEach(row => {
-      const bookName = row.querySelector('.book-link').textContent.toLowerCase();
-      row.style.display = bookName.includes(searchTerm) ? '' : 'none';
+        bookRows.forEach(row => {
+            const bookName = row.querySelector('.book-link').textContent.toLowerCase();
+            row.style.display = bookName.includes(searchTerm) ? '' : 'none';
+        });
     });
-  });
 });
 </script>
 
