@@ -1,248 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Book Exchange{% endblock %}</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-        rel="stylesheet"
-    />
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <style>
-        :root {
-            --primary: #1a73e8;
-            --primary-dark: #1669d6;
-            --text-primary: #202124;
-            --text-secondary: #5f6368;
-            --text-tertiary: #9aa0a6;
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --border: #dadce0;
-            --shadow: 0 1px 2px 0 rgba(60,64,67,0.3),
-                0 1px 3px 1px rgba(60,64,67,0.15);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Book Exchange{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #357CFF;
+      --primary-dark: #256adf;
+      --accent: #F6A801;
+      --text-primary: #23272F;
+      --text-secondary: #6e7b8b;
+      --text-tertiary: #a1adbd;
+      --bg-gradient: linear-gradient(120deg, #e3f0ff 0%, #d6eaff 54%, #fdfaef 100%);
+      --glass-bg: rgba(255,255,255,0.85);
+      --border: #c2dafc;
+      --shadow: 0 4px 18px rgba(52,112,255, 0.15);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Roboto", Arial, sans-serif;
-        }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
+        --glass-bg: rgba(50,60,90,0.80);
+        --text-primary: #e3e7ec;
+        --text-secondary: #bacbe8;
+        --text-tertiary: #899cc2;
+        --border: #39445a;
+      }
+    }
 
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Roboto', Arial, sans-serif;
+    }
 
-        header {
-            padding: 8px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            background: var(--bg-primary);
-            z-index: 100;
-        }
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background 0.6s;
+    }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
+    header {
+      padding: 1.2rem 2.2rem;
+      border-bottom: 1.5px solid var(--border);
+      background: var(--glass-bg);
+      box-shadow: 0 2px 24px rgba(52,112,255,0.09);
+      border-radius: 0 0 18px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      transition: background .35s;
+    }
 
-        .logo i {
-            color: var(--primary);
-        }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 2rem;
+      color: var(--primary);
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 9px rgba(52,112,255,0.08);
+    }
 
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 24px;
-        }
+    .logo i {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-right: 6px;
+      filter: drop-shadow(0 1px 2px var(--primary));
+    }
 
-        nav ul li a {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 14px;
-            padding: 8px 0;
-            position: relative;
-            transition: color 0.2s;
-        }
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 2.1rem;
+    }
 
-        nav ul li a:hover {
-            color: var(--text-primary);
-        }
+    nav ul li a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 7px 2px;
+      position: relative;
+      border-radius: 6px;
+      transition: color 0.22s, background 0.18s;
+    }
 
-        nav ul li a.active {
-            color: var(--primary);
-        }
+    nav ul li a:hover,
+    nav ul li a.active {
+      color: var(--primary);
+      background: rgba(52,112,255,0.07);
+    }
 
-        nav ul li a.active::after {
-            content: "";
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--primary);
-        }
+    nav ul li a.active::after {
+      content: "";
+      position: absolute;
+      bottom: -3.5px; left: 7px;
+      width: 70%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 57%, var(--accent) 100%);
+      border-radius: 10px;
+      box-shadow: 0 2px 7px rgba(52,112,255,0.13);
+    }
 
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
 
-        .user-actions a,
-        .user-actions button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 9px 24px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
+    .user-actions span {
+      font-size: 1rem;
+      color: var(--text-tertiary);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-right: 0.1em;
+    }
 
-        .user-actions a:hover,
-        .user-actions button:hover {
-            background: var(--primary-dark);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
+    .user-actions a,
+    .user-actions button {
+      background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
+      color: white;
+      border: none;
+      padding: 0.7rem 2rem;
+      border-radius: 22px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px 14px rgba(52,112,255, .14);
+      transition: background 0.20s, box-shadow 0.17s;
+    }
 
-        main {
-            flex: 1;
-            padding: 40px 20px;
-            max-width: 900px;
-            margin: auto;
-        }
+    .user-actions a:hover,
+    .user-actions button:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 11px 22px rgba(52,112,255, .14);
+      transform: scale(1.035);
+    }
 
-        footer {
-            background: var(--bg-secondary);
-            padding: 16px;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 14px;
-            border-top: 1px solid var(--border);
-            margin-top: auto;
-        }
+    main {
+      flex: 1;
+      padding: 3.5rem 1.8rem;
+      max-width: 950px;
+      margin: 12px auto 0 auto;
+      z-index: 1;
+      position: relative;
+    }
 
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 16px;
-                padding: 16px;
-            }
+    footer {
+      background: var(--glass-bg);
+      padding: 1.3rem 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      border-top: 1.5px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -2px 28px rgba(52,112,255,0.08);
+      margin-top: auto;
+      backdrop-filter: blur(8px);
+      letter-spacing: 0.01em;
+      font-weight: 600;
+    }
 
-            nav ul {
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-    </style>
+    @media (max-width: 800px) {
+      header {
+        flex-direction: column;
+        gap: 14px;
+        padding: 1.3rem 1rem;
+      }
+      nav ul {
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      main {
+        padding: 2.4rem 0.7rem;
+        max-width: 98vw;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .logo {font-size: 1.3rem;}
+      header {padding: 11px 2vw;}
+      nav ul {gap: 0.6rem;}
+      .user-actions a, .user-actions button {padding: 0.52rem 1rem;font-size: 0.95rem;}
+      main {padding: 1rem 2vw;}
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-book-open"></i>
-            <span>Book Exchange</span>
-        </div>
-        <nav>
-            <ul>
-                <li>
-                    <a
-                        href="{% url 'index' %}"
-                        class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"
-                        >Home</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'aboutus' %}"
-                        class="{% if request.resolver_match.url_name == 'aboutus' %}active{% endif %}"
-                        >About</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'postbook' %}"
-                        class="{% if request.resolver_match.url_name == 'postbook' %}active{% endif %}"
-                        >Post Book</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'displaybooks' %}"
-                        class="{% if request.resolver_match.url_name == 'displaybooks' %}active{% endif %}"
-                        >Display Books</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'mybooks' %}"
-                        class="{% if request.resolver_match.url_name == 'mybooks' %}active{% endif %}"
-                        >My Books</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'searchbooks' %}"
-                        class="{% if request.resolver_match.url_name == 'searchbooks' %}active{% endif %}"
-                        >Search</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="{% url 'checkout' %}"
-                        class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}"
-                        >Checkout</a
-                    >
-                </li>
-                {% if user.is_authenticated %}
-                <li>
-                    <a
-                        href="{% url 'user_settings' %}"
-                        class="{% if request.resolver_match.url_name == 'user_settings' %}active{% endif %}"
-                        >Profile Settings</a
-                    >
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        <div class="user-actions">
-            {% if user.is_authenticated %}
-            <span>Hello, {{ user.username }}</span>
-            <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-            <a href="{% url 'login' %}">Login</a>
-            <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
-    </header>
+<header>
+  <div class="logo">
+    <i class="fas fa-book-open"></i>
+    <span>Book Exchange</span>
+  </div>
+  <nav>
+    <ul>
+      <li>
+        <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
+      </li>
+      <li>
+        <a href="{% url 'aboutus' %}" class="{% if request.resolver_match.url_name == 'aboutus' %}active{% endif %}">About</a>
+      </li>
+      <li>
+        <a href="{% url 'postbook' %}" class="{% if request.resolver_match.url_name == 'postbook' %}active{% endif %}">Post Book</a>
+      </li>
+      <li>
+        <a href="{% url 'displaybooks' %}" class="{% if request.resolver_match.url_name == 'displaybooks' %}active{% endif %}">Display Books</a>
+      </li>
+      <li>
+        <a href="{% url 'mybooks' %}" class="{% if request.resolver_match.url_name == 'mybooks' %}active{% endif %}">My Books</a>
+      </li>
+      <li>
+        <a href="{% url 'searchbooks' %}" class="{% if request.resolver_match.url_name == 'searchbooks' %}active{% endif %}">Search</a>
+      </li>
+      <li>
+        <a href="{% url 'checkout' %}" class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">Checkout</a>
+      </li>
+      {% if user.is_authenticated %}
+      <li>
+        <a href="{% url 'user_settings' %}" class="{% if request.resolver_match.url_name == 'user_settings' %}active{% endif %}">Profile Settings</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  <div class="user-actions">
+    {% if user.is_authenticated %}
+      <span>Hello, {{ user.username }}</span>
+      <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'register' %}">Register</a>
+    {% endif %}
+  </div>
+</header>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+<main>
+  {% block content %}{% endblock %}
+</main>
 
-    <footer>
-        &copy; 2025 Book Exchange | All rights reserved
-    </footer>
+<footer>
+  &copy; 2025 Book Exchange | All rights reserved
+</footer>
 </body>
 </html>
