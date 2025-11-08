@@ -58,15 +58,13 @@ def postbook(request):
 
 def displaybooks(request):
     books = Book.objects.all()
-    for b in books:
-        b.pic_path = b.picture.url.split('/static/')[-1]
+    # Remove pic_path splitting; use picture.url directly in templates
     return render(request, 'bookMng/displaybooks.html', {'item_list': MainMenu.objects.all(), 'books': books})
 
 
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    book.pic_path = book.picture.url.split('/static/')[-1]
-
+    # Remove pic_path splitting static, use the direct url in template
     ratings = Rate.objects.filter(book=book)
     avg_rating = ratings.aggregate(Avg('rating'))['rating__avg']
 
@@ -74,7 +72,7 @@ def book_detail(request, book_id):
         'item_list': MainMenu.objects.all(),
         'book': book,
         'ratings': ratings,
-        'avg_rating': avg_rating
+        'avg_rating': avg_rating,
     })
 
 
@@ -88,12 +86,9 @@ def mybooks(request):
     posted_books = Book.objects.filter(username=request.user)
     purchased_items = ShoppingCart.objects.filter(user=request.user, checked_out=True)
     purchased_books_quantities = purchased_items.values('book').annotate(total_quantity=Sum('quantity'))
-
-    # Calculate returned quantities for user
     returned_books_quantities = BookReturn.objects.filter(user=request.user).values('book').annotate(total_quantity=Sum('quantity'))
     returned_quantities = {rq['book']: rq['total_quantity'] for rq in returned_books_quantities}
 
-    # Compute net purchased quantities = purchased - returned
     purchased_quantities = {}
     for pq in purchased_books_quantities:
         book_id = pq['book']
@@ -101,25 +96,17 @@ def mybooks(request):
         if net_qty > 0:
             purchased_quantities[book_id] = net_qty
 
-    # Filter purchased_books to include only books with positive net quantity
     purchased_books = Book.objects.filter(id__in=purchased_quantities.keys())
-
     favorite_books = request.user.favorite_books.all()
-
-    for book in posted_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
-    for book in purchased_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
-    for book in favorite_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
 
     return render(request, 'bookMng/mybooks.html', {
         'item_list': MainMenu.objects.all(),
         'posted_books': posted_books,
         'purchased_books': purchased_books,
         'purchased_quantities': purchased_quantities,
-        'favorite_books': favorite_books
+        'favorite_books': favorite_books,
     })
+
 
 def book_delete(request, book_id):
    book = Book.objects.get(id=book_id)
@@ -381,7 +368,7 @@ def return_book(request, book_id):
 
 @group_required('Publisher', 'Writer')
 def edit_book(request, book_id):
-    # Filter by username (the user who posted the book)
+    # Only allow editing by the user who posted the book
     book = get_object_or_404(Book, id=book_id, username=request.user)
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES, instance=book)

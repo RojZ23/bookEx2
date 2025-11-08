@@ -5,6 +5,17 @@
 <div class="container" style="max-width: 700px; margin-top: 40px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; box-shadow: var(--shadow);">
   <h1 style="font-weight: 700; color: var(--primary); margin-bottom: 1.5rem;">Edit Book</h1>
 
+  <!-- Book Cover Display and Dynamic Preview -->
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; width: 200px; height: 220px; overflow: hidden; border-radius: 16px; filter: drop-shadow(0 0 12px var(--primary));">
+      <img id="cover-preview"
+           src="{{ form.instance.picture.url }}"
+           alt="{{ form.instance.name }} Cover"
+           style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;"
+      />
+    </div>
+  </div>
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -29,7 +40,6 @@
 
     <div style="margin-bottom: 1rem;">
       <label style="font-weight: 600;">Published Date</label><br>
-      <!-- Display the formatted publish date (read-only) -->
       <p style="padding: 8px 12px; background: #f0f0f0; border-radius: 6px; border: 1px solid var(--border); width: fit-content;">
         {{ form.instance.publishdate|date:"F j, Y" }}
       </p>
@@ -41,8 +51,6 @@
       {{ form.web }}
     </div>
 
-    <!-- Add any other fields similarly -->
-
     <button type="submit" style="padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
       Save Changes
     </button>
@@ -51,4 +59,22 @@
     </a>
   </form>
 </div>
+
+<!-- Dynamic Cover Preview Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const input = document.querySelector('#id_picture');
+    const preview = document.getElementById('cover-preview');
+    if (input) {
+      input.addEventListener('change', function() {
+        const [file] = input.files;
+        if (file) {
+          preview.src = URL.createObjectURL(file);
+        } else {
+          preview.src = "{{ form.instance.picture.url }}";
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}
