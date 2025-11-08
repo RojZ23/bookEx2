@@ -5,15 +5,14 @@
 <section class="user-books-section"
     style="
         max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
+        margin: 2rem auto 4rem auto;
+        padding: 0 1rem;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         column-gap: 60px;
         align-items: start;
     "
 >
-
     <!-- Headers row -->
     <h2 style="
         grid-column: 1;
@@ -52,35 +51,46 @@
     <!-- Books You Posted -->
     <div style="grid-column: 1; text-align: left;">
         {% if posted_books %}
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 22px;">
             {% for book in posted_books %}
             <div style="
                 background: var(--bg-secondary);
                 border-radius: 12px;
-                padding: 15px 20px;
+                padding: 18px 22px;
                 box-shadow: var(--shadow);
                 min-height: 110px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-            ">
-                <div style="display: flex; align-items: center; gap: 16px;">
+                transition: box-shadow 0.3s ease;
+                cursor: pointer;
+            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
+                <div style="display: flex; align-items: center; gap: 18px;">
                     <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
-                    <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.05rem; text-decoration: none;">
-                        {{ book.name }}
-                    </a>
+                    <div>
+                      <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none;">
+                          {{ book.name }}
+                      </a>
+                      {% if book.description %}
+                      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 6px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ book.description|truncatechars:60 }}
+                      </p>
+                      {% endif %}
+                    </div>
                 </div>
                 <form method="post" action="{% url 'book_delete' book.id %}" style="margin-left: 15px;">
                     {% csrf_token %}
                     <button type="submit" style="
                         background: #dc3545;
                         color: white;
-                        padding: 7px 16px;
+                        padding: 8px 18px;
                         border-radius: 8px;
                         border: none;
                         cursor: pointer;
-                        font-size: 0.9rem;
-                    ">
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        transition: background-color 0.25s ease;
+                    " onmouseover="this.style.backgroundColor='#bb2d3b';" onmouseout="this.style.backgroundColor='#dc3545';">
                         Delete
                     </button>
                 </form>
@@ -88,8 +98,9 @@
             {% endfor %}
         </div>
         {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem;">
-            You haven't posted any books yet.
+        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
+            You haven't posted any books yet. <br />
+            Use the 'Post Book' section to share your collection with the community and start exchanging!
         </p>
         {% endif %}
     </div>
@@ -97,38 +108,47 @@
     <!-- Books You Purchased -->
     <div style="grid-column: 2; text-align: center;">
         {% if purchased_books %}
-        <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+        <div style="display: flex; flex-direction: column; gap: 22px; align-items: center;">
             {% for book in purchased_books %}
             <div style="
                 background: var(--bg-secondary);
                 border-radius: 12px;
-                padding: 15px 20px;
+                padding: 18px 22px;
                 box-shadow: var(--shadow);
                 min-height: 110px;
                 display: flex;
                 align-items: center;
-                gap: 16px;
+                gap: 18px;
                 justify-content: center;
-            ">
+                transition: box-shadow 0.3s ease;
+                cursor: pointer;
+            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
                 <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
-                <div style="text-align: left;">
-                    <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.05rem; text-decoration: none;">
+                <div style="text-align: left; max-width: 240px;">
+                    <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none;">
                         {{ book.name }}
                     </a>
-                    <div style="margin-top: 6px; font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
+                    {% if book.description %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 6px; max-height: 3.1em; line-height: 1.1; overflow: hidden; text-overflow: ellipsis;">
+                      {{ book.description|truncatechars:70 }}
+                    </p>
+                    {% endif %}
+                    <div style="margin-top: 8px; font-weight: 600; color: var(--text-secondary); font-size: 0.95rem;">
                         Purchased Quantity: {{ purchased_quantities|get_item:book.id|default:'0' }}
                     </div>
                     {% if purchased_quantities|get_item:book.id|default:0 > 0 %}
-                    <form method="get" action="{% url 'return_book' book.id %}" style="margin-top: 10px;">
+                    <form method="get" action="{% url 'return_book' book.id %}" style="margin-top: 12px;">
                         <button type="submit" style="
                             background: var(--primary-dark);
                             color: white;
-                            padding: 6px 16px;
+                            padding: 7px 18px;
                             border-radius: 8px;
                             border: none;
                             cursor: pointer;
-                            font-size: 0.9rem;
-                        ">
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: background-color 0.25s ease;
+                        " onmouseover="this.style.backgroundColor='var(--primary)';" onmouseout="this.style.backgroundColor='var(--primary-dark)';">
                             Return
                         </button>
                     </form>
@@ -138,8 +158,9 @@
             {% endfor %}
         </div>
         {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem;">
-            You haven't purchased any books yet.
+        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
+            You haven't purchased any books yet. <br />
+            Explore our catalog to find books and add them to your collection!
         </p>
         {% endif %}
     </div>
@@ -147,21 +168,23 @@
     <!-- Your Favorite Books -->
     <div style="grid-column: 3; text-align: right;">
         {% if favorite_books %}
-        <div style="display: flex; flex-direction: column; gap: 20px; align-items: flex-end;">
+        <div style="display: flex; flex-direction: column; gap: 22px; align-items: flex-end;">
             {% for book in favorite_books %}
             <div style="
                 background: var(--bg-secondary);
                 border-radius: 12px;
-                padding: 15px 20px;
+                padding: 18px 22px;
                 box-shadow: var(--shadow);
                 min-height: 110px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 16px;
+                gap: 18px;
                 width: 100%;
-            ">
-                <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.05rem; text-decoration: none;">
+                transition: box-shadow 0.3s ease;
+                cursor: pointer;
+            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
+                <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none; max-width: 65%;">
                     {{ book.name }}
                 </a>
                 <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
@@ -169,12 +192,11 @@
             {% endfor %}
         </div>
         {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem;">
-            You have no favorite books yet.
+        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
+            You have no favorite books yet. <br />
+            Mark books as favorites to quickly find and revisit titles you love.
         </p>
         {% endif %}
     </div>
-
-
 </section>
 {% endblock content %}
