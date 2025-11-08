@@ -2,201 +2,246 @@
 {% load static custom_filters %}
 
 {% block content %}
+<style>
+  .mybooks-cards-grid {
+    display: grid;
+    grid-auto-rows: 1fr;
+    row-gap: 14px;
+  }
+  .mybook-card {
+    min-height: 140px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 15px 15px;
+    transition: box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  .mybook-card:hover {
+    box-shadow: 0 8px 18px rgba(53,124,255,0.23);
+  }
+  /* Ensures image, text, and actions space nicely in same height */
+  .mybook-card > div, .mybook-card > form {
+    align-self: stretch;
+  }
+</style>
+
 <section class="user-books-section"
     style="
         max-width: 1200px;
-        margin: 2rem auto 4rem auto;
+        margin: 2rem auto 3rem auto;
         padding: 0 1rem;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        column-gap: 60px;
-        align-items: start;
     "
 >
-    <!-- Headers row -->
-    <h2 style="
-        grid-column: 1;
-        justify-self: start;
-        font-weight: 700;
-        font-size: 1.8rem;
-        color: var(--primary);
-        margin-bottom: 25px;
-        white-space: nowrap;
-    ">
-        Books You Posted
-    </h2>
-    <h2 style="
-        grid-column: 2;
-        justify-self: center;
-        font-weight: 700;
-        font-size: 1.8rem;
-        color: var(--primary);
-        margin-bottom: 25px;
-        white-space: nowrap;
-    ">
-        Books You Purchased
-    </h2>
-    <h2 style="
-        grid-column: 3;
-        justify-self: end;
-        font-weight: 700;
-        font-size: 1.8rem;
-        color: var(--primary);
-        margin-bottom: 25px;
-        white-space: nowrap;
-    ">
-        Your Favorite Books
-    </h2>
-
-    <!-- Books You Posted -->
-    <div style="grid-column: 1; text-align: left;">
-        {% if posted_books %}
-        <div style="display: flex; flex-direction: column; gap: 22px;">
-            {% for book in posted_books %}
-            <div style="
-                background: var(--bg-secondary);
-                border-radius: 12px;
-                padding: 18px 22px;
-                box-shadow: var(--shadow);
-                min-height: 110px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                transition: box-shadow 0.3s ease;
-                cursor: pointer;
-            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
-                <div style="display: flex; align-items: center; gap: 18px;">
-                    <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
-                    <div>
-                      <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none;">
-                          {{ book.name }}
-                      </a>
-                      {% if book.description %}
-                      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 6px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        {{ book.description|truncatechars:60 }}
-                      </p>
-                      {% endif %}
-                    </div>
-                </div>
-                <form method="post" action="{% url 'book_delete' book.id %}" style="margin-left: 15px;">
-                    {% csrf_token %}
-                    <button type="submit" style="
-                        background: #dc3545;
-                        color: white;
-                        padding: 8px 18px;
-                        border-radius: 8px;
-                        border: none;
-                        cursor: pointer;
-                        font-size: 0.95rem;
-                        font-weight: 600;
-                        transition: background-color 0.25s ease;
-                    " onmouseover="this.style.backgroundColor='#bb2d3b';" onmouseout="this.style.backgroundColor='#dc3545';">
-                        Delete
-                    </button>
-                </form>
-            </div>
-            {% endfor %}
+    <!-- User info & quick controls -->
+    <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between;">
+        <div style="font-size: 1.1rem; color: var(--text-secondary);">
+            <strong>Welcome, {{ user.username }}!</strong>
+            <span style="margin-left:12px;">Manage your personal book exchange dashboard.</span>
         </div>
-        {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
-            You haven't posted any books yet. <br />
-            Use the 'Post Book' section to share your collection with the community and start exchanging!
-        </p>
-        {% endif %}
+        <div style="display: flex; gap: 4px;">
+            <input type="text" placeholder="Search all your books..." id="myBooksSearch" style="border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 0.95rem;"/>
+            <button type="button" style="background: var(--primary); color: white; border: none; border-radius: 6px; padding: 6px 14px; font-weight: 600; cursor: pointer;" onclick="document.getElementById('myBooksSearch').focus();">
+                Search
+            </button>
+        </div>
+        <a href="{% url 'postbook' %}" style="background: var(--accent); padding: 7px 20px; border-radius: 8px; color: white; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow:0 3px 12px rgba(246,168,1,0.12);">
+            + Post New Book
+        </a>
     </div>
 
-    <!-- Books You Purchased -->
-    <div style="grid-column: 2; text-align: center;">
-        {% if purchased_books %}
-        <div style="display: flex; flex-direction: column; gap: 22px; align-items: center;">
-            {% for book in purchased_books %}
-            <div style="
-                background: var(--bg-secondary);
-                border-radius: 12px;
-                padding: 18px 22px;
-                box-shadow: var(--shadow);
-                min-height: 110px;
-                display: flex;
-                align-items: center;
-                gap: 18px;
-                justify-content: center;
-                transition: box-shadow 0.3s ease;
-                cursor: pointer;
-            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
-                <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
-                <div style="text-align: left; max-width: 240px;">
-                    <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none;">
-                        {{ book.name }}
-                    </a>
-                    {% if book.description %}
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 6px; max-height: 3.1em; line-height: 1.1; overflow: hidden; text-overflow: ellipsis;">
-                      {{ book.description|truncatechars:70 }}
-                    </p>
-                    {% endif %}
-                    <div style="margin-top: 8px; font-weight: 600; color: var(--text-secondary); font-size: 0.95rem;">
-                        Purchased Quantity: {{ purchased_quantities|get_item:book.id|default:'0' }}
+    <!-- Quick user book stats -->
+    <div style="margin-bottom: 12px; display:flex; gap: 20px; justify-content: start;">
+        <div style="background: var(--bg-secondary); border-radius:10px; padding:6px 18px; font-size:0.95rem; color:var(--primary); box-shadow:var(--shadow);">
+            <i class="fas fa-book-open" style="margin-right:6px;"></i>
+            Posted: <strong>{{ posted_books|length }}</strong>
+        </div>
+        <div style="background: var(--bg-secondary); border-radius:10px; padding:6px 18px; font-size:0.95rem; color:var(--primary); box-shadow:var(--shadow);">
+            <i class="fas fa-shopping-cart" style="margin-right:6px;"></i>
+            Purchased: <strong>{{ purchased_books|length }}</strong>
+        </div>
+        <div style="background: var(--bg-secondary); border-radius:10px; padding:6px 18px; font-size:0.95rem; color:var(--primary); box-shadow:var(--shadow);">
+            <i class="fas fa-heart" style="margin-right:6px;"></i>
+            Favorites: <strong>{{ favorite_books|length }}</strong>
+        </div>
+    </div>
+
+    <!-- GRID BLOCKS -->
+    <div id="my-books-grid" style="
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 30px;
+        align-items: start;
+        row-gap: 20px;
+        min-height: 400px;
+    ">
+        <!-- Books You Posted -->
+        <div style="text-align: left;">
+            <h2 style="
+                font-weight: 700;
+                font-size: 1.45rem;
+                color: var(--primary);
+                margin-bottom: 18px;
+                white-space: nowrap;
+            ">
+                Books You Posted
+            </h2>
+            <div id="postedBooksList" class="mybooks-cards-grid">
+            {% if posted_books %}
+                {% for book in posted_books %}
+                <div class="mybook-card" data-bookname="{{ book.name|lower }}">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                        <div>
+                          <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
+                              {{ book.name }}
+                          </a>
+                          {% if book.description %}
+                          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; max-width:180px; overflow:hidden;text-overflow:ellipsis;">
+                            {{ book.description|truncatechars:50 }}
+                          </p>
+                          {% endif %}
+                        </div>
                     </div>
-                    {% if purchased_quantities|get_item:book.id|default:0 > 0 %}
-                    <form method="get" action="{% url 'return_book' book.id %}" style="margin-top: 12px;">
+                    <form method="post" action="{% url 'book_delete' book.id %}" style="margin-left: 8px;">
+                        {% csrf_token %}
                         <button type="submit" style="
-                            background: var(--primary-dark);
+                            background: #dc3545;
                             color: white;
-                            padding: 7px 18px;
-                            border-radius: 8px;
+                            padding: 6px 12px;
+                            border-radius: 7px;
                             border: none;
                             cursor: pointer;
                             font-size: 0.95rem;
                             font-weight: 600;
                             transition: background-color 0.25s ease;
-                        " onmouseover="this.style.backgroundColor='var(--primary)';" onmouseout="this.style.backgroundColor='var(--primary-dark)';">
-                            Return
+                        " onmouseover="this.style.backgroundColor='#bb2d3b';" onmouseout="this.style.backgroundColor='#dc3545';">
+                            Delete
                         </button>
                     </form>
-                    {% endif %}
                 </div>
+                {% endfor %}
+            {% else %}
+            <p style="font-style: italic; color: var(--text-secondary); font-size: 0.98rem; margin-top: 7px;">
+                You haven't posted any books yet.<br />
+                Use the 'Post Book' section to share your collection and start exchanging!
+            </p>
+            {% endif %}
             </div>
-            {% endfor %}
+            <div style="margin-top: 16px; background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; font-size: 0.93rem; color: var(--text-secondary);">
+                <strong>Tip:</strong> Keep your listings updated to attract more readers. You can edit or delete posted books easily.
+            </div>
         </div>
-        {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
-            You haven't purchased any books yet. <br />
-            Explore our catalog to find books and add them to your collection!
-        </p>
-        {% endif %}
-    </div>
 
-    <!-- Your Favorite Books -->
-    <div style="grid-column: 3; text-align: right;">
-        {% if favorite_books %}
-        <div style="display: flex; flex-direction: column; gap: 22px; align-items: flex-end;">
-            {% for book in favorite_books %}
-            <div style="
-                background: var(--bg-secondary);
-                border-radius: 12px;
-                padding: 18px 22px;
-                box-shadow: var(--shadow);
-                min-height: 110px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 18px;
-                width: 100%;
-                transition: box-shadow 0.3s ease;
-                cursor: pointer;
-            " onmouseover="this.style.boxShadow='0 12px 28px rgba(53,124,255,0.3)';" onmouseout="this.style.boxShadow='var(--shadow)';">
-                <a href="{% url 'book_detail' book.id %}" style="color: var(--primary); font-weight: 600; font-size: 1.1rem; text-decoration: none; max-width: 65%;">
-                    {{ book.name }}
-                </a>
-                <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 90px; width: 60px; object-fit: cover; border-radius: 8px;" />
+        <!-- Books You Purchased -->
+        <div style="text-align: center;">
+            <h2 style="font-weight: 700; font-size: 1.45rem; color: var(--primary); margin-bottom: 18px; white-space: nowrap;">
+                Books You Purchased
+            </h2>
+            <div id="purchasedBooksList" class="mybooks-cards-grid">
+            {% if purchased_books %}
+                {% for book in purchased_books %}
+                <div class="mybook-card" data-bookname="{{ book.name|lower }}">
+                    <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                    <div style="text-align: left; max-width: 170px;">
+                        <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
+                            {{ book.name }}
+                        </a>
+                        {% if book.description %}
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; max-width:150px;overflow:hidden;text-overflow:ellipsis;">
+                          {{ book.description|truncatechars:50 }}
+                        </p>
+                        {% endif %}
+                        <div style="margin-top: 5px; font-weight: 600; color: var(--text-secondary); font-size: 0.94rem;">
+                            Purchased: {{ purchased_quantities|get_item:book.id|default:'0' }}
+                        </div>
+                        {% if purchased_quantities|get_item:book.id|default:0 > 0 %}
+                        <form method="get" action="{% url 'return_book' book.id %}" style="margin-top: 7px;">
+                            <button type="submit" style="
+                                background: var(--primary-dark);
+                                color: white;
+                                padding: 4px 12px;
+                                border-radius: 7px;
+                                border: none;
+                                cursor: pointer;
+                                font-size: 0.96rem;
+                                font-weight: 600;
+                                transition: background-color 0.20s ease;
+                            " onmouseover="this.style.backgroundColor='var(--primary)';" onmouseout="this.style.backgroundColor='var(--primary-dark)';">
+                                Return
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p style="font-style: italic; color: var(--text-secondary); font-size: 0.98rem; margin-top: 7px;">
+                You haven't purchased any books yet.<br />
+                Explore our catalog to find books and add them to your collection!
+            </p>
+            {% endif %}
             </div>
-            {% endfor %}
+            <div style="margin-top: 16px; background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; font-size: 0.93rem; color: var(--text-secondary); max-width: 210px; margin-left: auto; margin-right: auto;">
+                <strong>Did you know?</strong> Purchases are tracked automatically. You can return books conveniently using the return option.
+            </div>
         </div>
-        {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1rem; margin-top: 12px;">
-            You have no favorite books yet. <br />
-            Mark books as favorites to quickly find and revisit titles you love.
-        </p>
-        {% endif %}
+
+        <!-- Your Favorite Books -->
+        <div style="text-align: right;">
+            <h2 style="font-weight: 700; font-size: 1.45rem; color: var(--primary); margin-bottom: 18px; white-space: nowrap;">
+                Your Favorite Books
+            </h2>
+            <div id="favoriteBooksList" class="mybooks-cards-grid">
+            {% if favorite_books %}
+                {% for book in favorite_books %}
+                <div class="mybook-card" data-bookname="{{ book.name|lower }}">
+                    <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none; max-width: 60%;">
+                        {{ book.name }}
+                    </a>
+                    <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                </div>
+                {% endfor %}
+            {% else %}
+            <p style="font-style: italic; color: var(--text-secondary); font-size: 0.98rem; margin-top: 7px;">
+                You have no favorite books yet.<br />
+                Mark books as favorites to keep track of must-read titles and recommendations.
+            </p>
+            {% endif %}
+            </div>
+            <div style="margin-top: 16px; background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; font-size: 0.93rem; color: var(--text-secondary); max-width: 210px; margin-left: auto;">
+                <strong>Tip:</strong> Use the favorite feature as your personal bookshelf to quickly find and revisit titles you love.
+            </div>
+        </div>
     </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('myBooksSearch');
+    const postedCards = document.querySelectorAll('#postedBooksList .mybook-card');
+    const purchasedCards = document.querySelectorAll('#purchasedBooksList .mybook-card');
+    const favoriteCards = document.querySelectorAll('#favoriteBooksList .mybook-card');
+
+    function filterMyBooks() {
+        const term = searchInput.value.trim().toLowerCase();
+        postedCards.forEach(card => {
+            const bookname = card.getAttribute('data-bookname');
+            card.style.display = (!term || bookname.includes(term)) ? '' : 'none';
+        });
+        purchasedCards.forEach(card => {
+            const bookname = card.getAttribute('data-bookname');
+            card.style.display = (!term || bookname.includes(term)) ? '' : 'none';
+        });
+        favoriteCards.forEach(card => {
+            const bookname = card.getAttribute('data-bookname');
+            card.style.display = (!term || bookname.includes(term)) ? '' : 'none';
+        });
+    }
+    searchInput.addEventListener('input', filterMyBooks);
+});
+</script>
 {% endblock content %}
