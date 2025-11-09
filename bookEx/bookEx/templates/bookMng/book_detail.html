@@ -1,178 +1,190 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block content %}
 <div style="max-width: 850px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-primary); background: #14213d; padding: 24px 28px; border-radius: 20px; box-shadow: 0 10px 32px rgba(53,112,255,0.6);">
-  <h1 style="font-weight: 700; color: var(--primary); font-size: 2.6rem; text-align: left; letter-spacing: 1px; margin-bottom: 1rem;">
-    {{ book.name }}
-  </h1>
+ <h1 style="font-weight: 700; color: var(--primary); font-size: 2.6rem; text-align: left; letter-spacing: 1px; margin-bottom: 1rem;">
+   {{ book.name }}
+ </h1>
 
-  <div style="display: flex; gap: 25px;">
-    <div style="flex: 0 0 200px; height: 220px; overflow: hidden; border-radius: 16px; filter: drop-shadow(0 0 12px var(--primary));">
-      <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" />
-    </div>
 
-    <div style="flex: 1 1 auto; min-width: 300px; color: var(--text-primary); font-size: 16px;">
-      <p><strong>Price:</strong> ${{ book.price }}</p>
-      <p><strong>Posted by:</strong> {{ book.username }}</p>
-      <p><strong>Published:</strong> {{ book.publishdate|date:"M. d, Y" }}</p>
+ <div style="display: flex; gap: 25px;">
+   <div style="flex: 0 0 200px; height: 220px; overflow: hidden; border-radius: 16px; filter: drop-shadow(0 0 12px var(--primary));">
+     <img src="{% static book.pic_path %}" alt="{{ book.name }} Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" />
+   </div>
 
-      <p><strong>Website:</strong> <a href="{{ book.web }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Visit Website</a></p>
 
-      {% if user.is_authenticated %}
-        <form action="{% url 'add_to_cart' book.id %}" method="get" style="margin-top: 15px;">
-          <button type="submit" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 8px 28px rgba(53, 112, 255, 0.7); cursor: pointer; transition: background 0.3s;">
-            Add to Cart
-          </button>
-        </form>
-      {% else %}
-        <form action="{% url 'login' %}" method="get" style="margin-top: 15px;">
-          <button type="submit" style="width: 100%; background: #444; color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer;">
-            Login to purchase this book
-          </button>
-        </form>
-      {% endif %}
+   <div style="flex: 1 1 auto; min-width: 300px; color: var(--text-primary); font-size: 16px;">
+     <p><strong>Price:</strong> ${{ book.price }}</p>
+     <p><strong>Posted by:</strong> {{ book.username }}</p>
+     <p><strong>Published:</strong> {{ book.publishdate|date:"M. d, Y" }}</p>
 
-      {% if user == book.username %}
-        <form action="{% url 'edit_book' book.id %}" method="get" style="margin-top: 12px;">
-          <button type="submit" style="padding: 8px 18px; border-radius: 8px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer;">
-            Edit Book
-          </button>
-        </form>
-      {% endif %}
 
-      <div style="margin-top: 20px; display: flex; gap: 18px;">
-        <form action="{% url 'rate_book' book.id %}" method="get" style="flex: 1;">
-          <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #fca311; border-radius: 10px; box-shadow: 0 8px 22px rgba(252,163,17,0.7); border: none; cursor: pointer; color: #1a1a1a;">
-            Rate this Book
-          </button>
-        </form>
-        <form action="{% url 'searchbooks' %}" method="get" style="flex: 1;">
-          <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: var(--primary); border-radius: 10px; box-shadow: 0 10px 30px rgba(53,112,255,0.9); border: none; cursor: pointer; color: white;">
-            Back to Search
-          </button>
-        </form>
-        {% if user.is_authenticated %}
-          <form action="{% url 'toggle_favorite' book.id %}" method="post" style="flex: 1;">
-            {% csrf_token %}
-            {% if user in book.favorites.all %}
-              <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #dc3545; border-radius: 10px; box-shadow: 0 5px 18px rgba(220,53,69,0.6); border: none; cursor: pointer; color: white;">
-                Remove from Favorites
-              </button>
-            {% else %}
-              <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: transparent; border: 2px solid var(--primary); border-radius: 10px; color: var(--primary); cursor: pointer;">
-                Add to Favorites
-              </button>
-            {% endif %}
-          </form>
-        {% endif %}
-      </div>
+     <p><strong>Website:</strong> <a href="{{ book.web }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Visit Website</a></p>
 
-      <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Ratings</h3>
-      {% if ratings %}
-        <p style="font-weight: 600; font-size: 1.1rem;">Average Rating:
-          {% if avg_rating %}
-          <span style="color: #FFD700; font-size: 1.5rem; margin-left: 12px; user-select:none;">
-            {% for i in "12345" %}
-              {% if avg_rating|floatformat:1 >= i %}
-                &#9733;
-              {% elif avg_rating|floatformat:1 > i|add:"-1" %}
-                <span style="position: relative; display:inline-block; width: 1em; color: #FFD700; overflow: hidden;">
-                  &#9733;
-                  <span style="position: absolute; left: 0; top: 0; width: 50%; color: #ccc;">&#9733;</span>
-                </span>
-              {% else %}
-                <span style="color: #ccc;">&#9733;</span>
-              {% endif %}
-            {% endfor %}
-          </span>
-          <span style="font-size: 1rem; color: var(--text-secondary); margin-left: 10px;">({{ avg_rating }}/5)</span>
-          {% else %}
-          <span style="font-style: italic; color: var(--text-secondary); margin-left: 10px;">No ratings yet</span>
-          {% endif %}
-        </p>
 
-        <ul style="list-style:none; margin-top: 12px; padding-left: 0;">
-          {% for rate in ratings %}
-          <li style="margin-bottom: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: var(--text-secondary);">
-            <div><strong>{% if rate.user == user %}You{% else %}Anonymous{% endif %}</strong></div>
-            <div>
-              {% for i in "12345" %}
-                {% if i|add:"0" <= rate.rating %}
-                  <span style="color:#FFD700; font-size:1.3rem;">&#9733;</span>
-                {% else %}
-                  <span style="color:#ccc; font-size:1.3rem;">&#9733;</span>
-                {% endif %}
-              {% endfor %}
-            </div>
-            {% if rate.user == user %}
-            <form method="post" action="{% url 'delete_rating' rate.id %}">
-              {% csrf_token %}
-              <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Delete</button>
-            </form>
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <form action="{% url 'rate_book' book.id %}" method="get" style="margin-top: 12px;">
-          <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Be the first to rate this book</button>
-        </form>
-      {% endif %}
+     {% if user.is_authenticated %}
+       <form action="{% url 'add_to_cart' book.id %}" method="get" style="margin-top: 15px;">
+         <button type="submit" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 8px 28px rgba(53, 112, 255, 0.7); cursor: pointer; transition: background 0.3s;">
+           Add to Cart
+         </button>
+       </form>
+     {% else %}
+       <form action="{% url 'login' %}" method="get" style="margin-top: 15px;">
+         <button type="submit" style="width: 100%; background: #444; color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer;">
+           Login to purchase this book
+         </button>
+       </form>
+     {% endif %}
 
-      <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Comments</h3>
-      {% if user.is_authenticated %}
-        <form method="post" action="{% url 'add_comment' book.id %}">
-          {% csrf_token %}
-          <textarea name="content" rows="3" placeholder="Add your comment here" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; font-size: 1rem; resize: vertical;"></textarea>
-          <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Submit Comment</button>
-        </form>
-      {% else %}
-        <form action="{% url 'login' %}" method="get">
-          <button type="submit" style="background: var(--text-secondary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Login to add comments</button>
-        </form>
-      {% endif %}
 
-      {% if book.comments.all %}
-        <ul style="list-style:none; padding-left:0; margin-top: 20px;">
-          {% for comment in book.comments.all %}
-          <li style="background: var(--bg-secondary); margin-bottom: 14px; border-radius: 10px; padding: 12px; font-size: 1rem; color: var(--text-primary);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <div>
-                <strong>{{ comment.user.username }}</strong>
-                <small style="color: var(--text-secondary); margin-left: 10px;">{{ comment.created_at|date:"M d, Y H:i" }}</small>
-              </div>
-              {% if user == comment.user %}
-              <div style="display: flex; gap: 8px;">
-                <form method="get" action="{% url 'book_detail' book.id %}">
-                  <input type="hidden" name="edit_comment" value="{{ comment.id }}">
-                  <button type="submit" style="background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 6px 16px; border-radius: 8px; cursor: pointer;">Edit</button>
-                </form>
-                <form method="post" action="{% url 'delete_comment' comment.id %}">
-                  {% csrf_token %}
-                  <button type="submit" style="background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer;">Delete</button>
-                </form>
-              </div>
-              {% endif %}
-            </div>
+     {% if user == book.username %}
+       <form action="{% url 'edit_book' book.id %}" method="get" style="margin-top: 12px;">
+         <button type="submit" style="padding: 8px 18px; border-radius: 8px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer;">
+           Edit Book
+         </button>
+       </form>
+     {% endif %}
 
-            {% if user == comment.user and request.GET.edit_comment|stringformat:"s" == comment.id|stringformat:"s" %}
-              <form method="post" action="{% url 'edit_comment' comment.id %}">
-                {% csrf_token %}
-                <textarea name="content" rows="3" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem;">{{ comment.content }}</textarea>
-                <button type="submit" style="margin-top: 8px; background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Save</button>
-                <a href="{% url 'book_detail' book.id %}" style="margin-left: 10px; padding: 10px 24px; border-radius: 12px; border: 2px solid var(--primary); color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none;">Cancel</a>
-              </form>
-            {% else %}
-              <p>{{ comment.content }}</p>
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p style="font-style: italic; color: var(--text-secondary); font-size: 1.1rem; margin-top: 16px;">No comments yet. Be the first to add one!</p>
-      {% endif %}
-    </div>
-  </div>
+
+     <div style="margin-top: 20px; display: flex; gap: 18px;">
+       <form action="{% url 'rate_book' book.id %}" method="get" style="flex: 1;">
+         <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #fca311; border-radius: 10px; box-shadow: 0 8px 22px rgba(252,163,17,0.7); border: none; cursor: pointer; color: #1a1a1a;">
+           Rate this Book
+         </button>
+       </form>
+       <form action="{% url 'searchbooks' %}" method="get" style="flex: 1;">
+         <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: var(--primary); border-radius: 10px; box-shadow: 0 10px 30px rgba(53,112,255,0.9); border: none; cursor: pointer; color: white;">
+           Back to Search
+         </button>
+       </form>
+       {% if user.is_authenticated %}
+         <form action="{% url 'toggle_favorite' book.id %}" method="post" style="flex: 1;">
+           {% csrf_token %}
+           {% if user in book.favorites.all %}
+             <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #dc3545; border-radius: 10px; box-shadow: 0 5px 18px rgba(220,53,69,0.6); border: none; cursor: pointer; color: white;">
+               Remove from Favorites
+             </button>
+           {% else %}
+             <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: transparent; border: 2px solid var(--primary); border-radius: 10px; color: var(--primary); cursor: pointer;">
+               Add to Favorites
+             </button>
+           {% endif %}
+         </form>
+       {% endif %}
+     </div>
+
+
+     <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Ratings</h3>
+     {% if ratings %}
+       <p style="font-weight: 600; font-size: 1.1rem;">Average Rating:
+         {% if avg_rating %}
+         <span style="color: #FFD700; font-size: 1.5rem; margin-left: 12px; user-select:none;">
+           {% for i in "12345" %}
+             {% if avg_rating|floatformat:1 >= i %}
+               ★
+             {% elif avg_rating|floatformat:1 > i|add:"-1" %}
+               <span style="position: relative; display:inline-block; width: 1em; color: #FFD700; overflow: hidden;">
+                 ★
+                 <span style="position: absolute; left: 0; top: 0; width: 50%; color: #ccc;">★</span>
+               </span>
+             {% else %}
+               <span style="color: #ccc;">★</span>
+             {% endif %}
+           {% endfor %}
+         </span>
+         <span style="font-size: 1rem; color: var(--text-secondary); margin-left: 10px;">({{ avg_rating }}/5)</span>
+         {% else %}
+         <span style="font-style: italic; color: var(--text-secondary); margin-left: 10px;">No ratings yet</span>
+         {% endif %}
+       </p>
+
+
+       <ul style="list-style:none; margin-top: 12px; padding-left: 0;">
+         {% for rate in ratings %}
+         <li style="margin-bottom: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: var(--text-secondary);">
+           <div><strong>{% if rate.user == user %}You{% else %}Anonymous{% endif %}</strong></div>
+           <div>
+             {% for i in "12345" %}
+               {% if i|add:"0" <= rate.rating %}
+                 <span style="color:#FFD700; font-size:1.3rem;">★</span>
+               {% else %}
+                 <span style="color:#ccc; font-size:1.3rem;">★</span>
+               {% endif %}
+             {% endfor %}
+           </div>
+           {% if rate.user == user %}
+           <form method="post" action="{% url 'delete_rating' rate.id %}">
+             {% csrf_token %}
+             <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Delete</button>
+           </form>
+           {% endif %}
+         </li>
+         {% endfor %}
+       </ul>
+     {% else %}
+       <form action="{% url 'rate_book' book.id %}" method="get" style="margin-top: 12px;">
+         <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Be the first to rate this book</button>
+       </form>
+     {% endif %}
+
+
+     <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Comments</h3>
+     {% if user.is_authenticated %}
+       <form method="post" action="{% url 'add_comment' book.id %}">
+         {% csrf_token %}
+         <textarea name="content" rows="3" placeholder="Add your comment here" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; font-size: 1rem; resize: vertical;"></textarea>
+         <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Submit Comment</button>
+       </form>
+     {% else %}
+       <form action="{% url 'login' %}" method="get">
+         <button type="submit" style="background: var(--text-secondary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Login to add comments</button>
+       </form>
+     {% endif %}
+
+
+     {% if book.comments.all %}
+       <ul style="list-style:none; padding-left:0; margin-top: 20px;">
+         {% for comment in book.comments.all %}
+         <li style="background: var(--bg-secondary); margin-bottom: 14px; border-radius: 10px; padding: 12px; font-size: 1rem; color: var(--text-primary);">
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+             <div>
+               <strong>{{ comment.user.username }}</strong>
+               <small style="color: var(--text-secondary); margin-left: 10px;">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+             </div>
+             {% if user == comment.user %}
+             <div style="display: flex; gap: 8px;">
+               <form method="get" action="{% url 'book_detail' book.id %}">
+                 <input type="hidden" name="edit_comment" value="{{ comment.id }}">
+                 <button type="submit" style="background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 6px 16px; border-radius: 8px; cursor: pointer;">Edit</button>
+               </form>
+               <form method="post" action="{% url 'delete_comment' comment.id %}">
+                 {% csrf_token %}
+                 <button type="submit" style="background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer;">Delete</button>
+               </form>
+             </div>
+             {% endif %}
+           </div>
+
+
+           {% if user == comment.user and request.GET.edit_comment|stringformat:"s" == comment.id|stringformat:"s" %}
+             <form method="post" action="{% url 'edit_comment' comment.id %}">
+               {% csrf_token %}
+               <textarea name="content" rows="3" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem;">{{ comment.content }}</textarea>
+               <button type="submit" style="margin-top: 8px; background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Save</button>
+               <a href="{% url 'book_detail' book.id %}" style="margin-left: 10px; padding: 10px 24px; border-radius: 12px; border: 2px solid var(--primary); color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none;">Cancel</a>
+             </form>
+           {% else %}
+             <p>{{ comment.content }}</p>
+           {% endif %}
+         </li>
+         {% endfor %}
+       </ul>
+     {% else %}
+       <p style="font-style: italic; color: var(--text-secondary); font-size: 1.1rem; margin-top: 16px;">No comments yet. Be the first to add one!</p>
+     {% endif %}
+   </div>
+ </div>
 </div>
 {% endblock %}
