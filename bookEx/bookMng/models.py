@@ -26,7 +26,7 @@ class Book(models.Model):
         if self.picture:
             self.pic_path = self.picture.name  # relative path like 'uploads/filename.jpg'
             super().save(update_fields=['pic_path'])
-
+            
     def __str__(self):
         return self.name
 
