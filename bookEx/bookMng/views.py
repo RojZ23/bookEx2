@@ -78,13 +78,8 @@ def book_detail(request, book_id):
     })
 
 
+@login_required
 def mybooks(request):
-    if not request.user.is_authenticated:
-        return render(request, 'bookMng/login_required.html', {
-            'message': 'You need to login to view your books.',
-            'item_list': MainMenu.objects.all(),
-        })
-
     posted_books = Book.objects.filter(username=request.user)
     purchased_items = ShoppingCart.objects.filter(user=request.user, checked_out=True)
     purchased_books_quantities = purchased_items.values('book').annotate(total_quantity=Sum('quantity'))
@@ -101,25 +96,30 @@ def mybooks(request):
         if net_qty > 0:
             purchased_quantities[book_id] = net_qty
 
-    # Filter purchased_books to include only books with positive net quantity
-    purchased_books = Book.objects.filter(id__in=purchased_quantities.keys())
+    # Calculate total purchased quantity (sum of all net quantities)
+    total_purchased_qty = sum(purchased_quantities.values())
 
+    # Filter purchased_books to only include books with positive net
+    purchased_books = Book.objects.filter(id__in=purchased_quantities.keys())
     favorite_books = request.user.favorite_books.all()
 
+    # Use correct picture url
     for book in posted_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
+        book.pic_path = book.picture.url
     for book in purchased_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
+        book.pic_path = book.picture.url
     for book in favorite_books:
-        book.pic_path = book.picture.url.split('/static/')[-1]
+        book.pic_path = book.picture.url
 
-    return render(request, 'bookMng/mybooks.html', {
+    context = {
         'item_list': MainMenu.objects.all(),
         'posted_books': posted_books,
         'purchased_books': purchased_books,
         'purchased_quantities': purchased_quantities,
-        'favorite_books': favorite_books
-    })
+        'favorite_books': favorite_books,
+        'total_purchased_qty': total_purchased_qty,  # pass total quantity
+    }
+    return render(request, 'bookMng/mybooks.html', context)
 
 def book_delete(request, book_id):
    book = Book.objects.get(id=book_id)
@@ -171,6 +171,15 @@ def register_success(request):
 @login_required
 def user_settings(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    # Calculate total purchased quantity of books (checked_out=True)
+    purchased_agg = ShoppingCart.objects.filter(user=request.user, checked_out=True).aggregate(total_purchased=Sum('quantity'))
+    total_purchased = purchased_agg['total_purchased'] or 0
+
+    # Calculate total returned quantity of books
+    returned_agg = BookReturn.objects.filter(user=request.user).aggregate(total_returned=Sum('quantity'))
+    total_returned = returned_agg['total_returned'] or 0
+
     if request.method == 'POST':
         new_role = request.POST.get('role')
         if new_role in ['Regular', 'Publisher', 'Writer']:
@@ -180,8 +189,13 @@ def user_settings(request):
             return redirect('user_settings')
         else:
             messages.error(request, 'Invalid role selected.')
-    return render(request, 'user_settings.html', {'profile': profile})
 
+    context = {
+        'profile': profile,
+        'total_purchased': total_purchased,
+        'total_returned': total_returned,
+    }
+    return render(request, 'user_settings.html', context)
 
 def aboutus(request):
    return render(request, 'aboutus.html', { 'item_list': MainMenu.objects.all() })

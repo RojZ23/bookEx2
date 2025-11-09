@@ -62,7 +62,7 @@
         </div>
         <div style="background: var(--bg-secondary); border-radius:10px; padding:6px 18px; font-size:0.95rem; color:var(--primary); box-shadow:var(--shadow);">
             <i class="fas fa-shopping-cart" style="margin-right:6px;"></i>
-            Purchased: <strong>{{ purchased_books|length }}</strong>
+            Purchased: <strong>{{ total_purchased_qty }}</strong>  <!-- Show total quantity -->
         </div>
         <div style="background: var(--bg-secondary); border-radius:10px; padding:6px 18px; font-size:0.95rem; color:var(--primary); box-shadow:var(--shadow);">
             <i class="fas fa-heart" style="margin-right:6px;"></i>
@@ -203,7 +203,7 @@
                     <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none; max-width: 60%;">
                         {{ book.name }}
                     </a>
-                    <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                    <img src="{{ book.picture.url }}" alt="{{ book.name }}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                 </div>
                 {% endfor %}
             {% else %}

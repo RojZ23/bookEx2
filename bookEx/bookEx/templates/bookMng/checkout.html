@@ -22,7 +22,7 @@
         {% for item in cart_items %}
         <tr style="background: var(--bg-primary); height: 110px;">
           <td style="padding: 8px;">
-            <img src="{% static item.book.pic_path %}" alt="{{ item.book.name }}" style="width: 70px; height: 100px; object-fit: cover; border-radius: 6px;">
+            <img src="{{ item.book.picture.url }}" alt="{{ item.book.name }}" style="width: 70px; height: 100px; object-fit: cover; border-radius: 6px;">
           </td>
           <td style="font-weight: 600; text-align: left; padding-left: 15px;">
             <a href="{% url 'book_detail' item.book.id %}" style="color: var(--primary); text-decoration: none;">
