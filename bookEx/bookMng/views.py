@@ -393,7 +393,7 @@ def return_book(request, book_id):
     })
 
 
-@group_required('Publisher', 'Writer')
+@group_required('Writer')
 def edit_book(request, book_id):
     book = get_object_or_404(Book, id=book_id, username=request.user)
     old_picture = book.picture
