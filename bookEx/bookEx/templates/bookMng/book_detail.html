@@ -11,7 +11,7 @@
 
  <div style="display: flex; gap: 25px;">
    <div style="flex: 0 0 200px; height: 220px; overflow: hidden; border-radius: 16px; filter: drop-shadow(0 0 12px var(--primary));">
-     <img src="{% static book.pic_path %}" alt="{{ book.name }} Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" />
+     <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" />
    </div>
 
 

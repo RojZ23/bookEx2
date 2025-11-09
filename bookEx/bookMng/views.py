@@ -381,16 +381,18 @@ def return_book(request, book_id):
 
 @group_required('Publisher', 'Writer')
 def edit_book(request, book_id):
-    # Filter by username (the user who posted the book)
     book = get_object_or_404(Book, id=book_id, username=request.user)
+    old_picture = book.picture
+
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
-            form.save()
+            form.save()  # triggers model save() and hence updates pic_path
             return redirect('book_detail', book_id=book.id)
     else:
         form = BookForm(instance=book)
     return render(request, 'editbook.html', {'form': form})
+
 
 @group_required('Publisher', 'Writer')
 def delete_book(request, book_id):

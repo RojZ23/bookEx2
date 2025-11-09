@@ -15,11 +15,17 @@ class Book(models.Model):
     web = models.URLField(max_length=300)
     price = models.DecimalField(decimal_places=2, max_digits=8)
     publishdate = models.DateField(auto_now=True)
-    picture = models.FileField(upload_to='bookEx/static/uploads')
+    picture = models.FileField(upload_to='uploads/')
     pic_path = models.CharField(max_length=300, editable=False, blank=True)
     username = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     favorites = models.ManyToManyField(User, related_name='favorite_books', blank=True)
     quantity = models.PositiveIntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.picture:
+            self.pic_path = self.picture.name  # relative path like 'uploads/filename.jpg'
+            super().save(update_fields=['pic_path'])
 
     def __str__(self):
         return self.name

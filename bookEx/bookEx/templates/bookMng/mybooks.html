@@ -95,7 +95,7 @@
                 {% for book in posted_books %}
                 <div class="mybook-card" data-bookname="{{ book.name|lower }}">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                        <img src="{{ book.picture.url }}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                         <div>
                           <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
                               {{ book.name }}
@@ -146,7 +146,7 @@
             {% if purchased_books %}
                 {% for book in purchased_books %}
                 <div class="mybook-card" data-bookname="{{ book.name|lower }}">
-                    <img src="{% static book.pic_path %}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                    <img src="{{ book.picture.url }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                     <div style="text-align: left; max-width: 170px;">
                         <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
                             {{ book.name }}
