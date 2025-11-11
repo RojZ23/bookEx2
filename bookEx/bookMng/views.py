@@ -28,6 +28,8 @@ from datetime import date
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
 
+
+
 def postbook(request):
     if not request.user.is_authenticated:
         return render(request, 'bookMng/login_required.html', {
@@ -233,7 +235,6 @@ def aboutus(request):
    return render(request, 'aboutus.html', { 'item_list': MainMenu.objects.all() })
 
 
-
 def searchbooks(request):
     query = request.GET.get('q')
     min_rating = request.GET.get('min_rating')
@@ -243,27 +244,26 @@ def searchbooks(request):
     user_profile = getattr(request.user, 'userprofile', None)
     books = Book.objects.all()
 
-    # Filter out exclusive books for non-eligible users
     if user_profile:
         if user_profile.role == 'Writer':
-            # Writers can see all books including exclusive
-            pass  # No filter needed here
+            # Writers can see all books
+            pass
         elif user_profile.role == 'Regular':
-            # Regular users see only non-exclusive plus Bronze+ exclusive books
-            if user_profile.tier in ['Bronze', 'Silver', 'Gold']:
+            # For Regular users, show non-exclusive plus exclusive allowed by user's tier
+            allowed_tier = user_profile.tier
+            if allowed_tier in ['Bronze', 'Silver', 'Gold', 'Silver+', 'GoldOnly']:
                 books = books.filter(
-                    Q(is_exclusive=False) |  # non-exclusive books
-                    Q(is_exclusive=True,
-                      exclusive_meta__allowed_tiers__in=['Bronze', 'Silver', 'Gold', 'Silver+', 'GoldOnly'])
+                    Q(is_exclusive=False) |
+                    Q(is_exclusive=True, exclusive_meta__allowed_tiers=allowed_tier)
                 )
             else:
-                # Free tier only see non exclusive books
+                # Free tier or others see only non-exclusive
                 books = books.filter(is_exclusive=False)
         else:
-            # Publishers or other roles see only non-exclusive books
+            # Publishers or other roles see only non-exclusive
             books = books.filter(is_exclusive=False)
     else:
-        # Not logged-in or no profile - only non-exclusive
+        # Anonymous users see only non-exclusive
         books = books.filter(is_exclusive=False)
 
     if query:
@@ -271,7 +271,7 @@ def searchbooks(request):
 
     books = books.annotate(avg_rating_value=Avg('rate__rating'))
 
-    # Filter by rating only if min_rating is set and not 'none'
+    # Further filters (rating, price) unchanged
     if min_rating and min_rating != 'none':
         try:
             min_rating_float = float(min_rating)
@@ -295,12 +295,11 @@ def searchbooks(request):
 
     books = books.prefetch_related('comments')
 
-    # For static pic_path extraction and rating None handling
     for book in books:
         if book.picture:
             book.pic_path = book.picture.url.split('/static/')[-1]
         else:
-            book.pic_path = 'default.jpg'  # fallback image path if needed
+            book.pic_path = 'default.jpg'  # fallback image path
         if book.avg_rating_value is None:
             book.avg_rating_value = None
 
@@ -452,6 +451,7 @@ def return_book(request, book_id):
     })
 
 
+@login_required
 @group_required('Writer')
 def edit_book(request, book_id):
     book = get_object_or_404(Book, id=book_id, username=request.user)
@@ -460,11 +460,23 @@ def edit_book(request, book_id):
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
-            form.save()  # triggers model save() and hence updates pic_path
+            book = form.save(commit=False)
+
+            # Update or create ExclusiveBookMeta if the book is exclusive
+            if book.is_exclusive:
+                allowed_tiers = request.POST.get('allowed_tiers')
+                # Create or update ExclusiveBookMeta record
+                ExclusiveBookMeta.objects.update_or_create(
+                    book=book,
+                    defaults={'allowed_tiers': allowed_tiers}
+                )
+            book.save()  # Save book and exclusive meta changes
             return redirect('book_detail', book_id=book.id)
     else:
         form = BookForm(instance=book)
+
     return render(request, 'editbook.html', {'form': form})
+
 
 
 @group_required('Publisher', 'Writer')
@@ -553,6 +565,7 @@ def exclusive_books(request):
         'books': books_qs,
         'is_writer': is_writer,
         'visible_tiers': visible_tiers,
+        'user_tier': profile.tier,
     }
     return render(request, "bookMng/exclusive_books.html", context)
 

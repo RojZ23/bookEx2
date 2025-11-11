@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load static %}
+{% load custom_tier_filters %}  {# load your custom filter module for tier comparison #}
 
+{% block content %}
 <section style="max-width: 900px; margin: 3rem auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
   <h2 style="text-align: center; color: var(--primary); font-weight: 800; margin-bottom: 2rem;">
     Exclusive Books for Supporters
@@ -35,9 +37,18 @@
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">By {{ book.username }}</p>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${{ book.price }}</p>
 
-          <a href="{% url 'exclusive_book_detail' book.id %}" style="display: inline-block; background: var(--primary);
+          {% comment %} Compare user tier with book allowed tier using custom template tag {% endcomment %}
+          {% is_tier_lower user_tier book.exclusive_meta.allowed_tiers as user_below_tier %}
+          {% if user_below_tier and not is_writer %}
+            <p style="color: red; font-weight: 700; margin-top: 12px;">
+              Want to view book?
+              <a href="{% url 'user_settings' %}" style="color: var(--primary); text-decoration: underline;">Upgrade your subscription today!</a>
+            </p>
+          {% else %}
+            <a href="{% url 'exclusive_book_detail' book.id %}" style="display: inline-block; background: var(--primary);
               color: white; font-weight: 600; text-decoration: none; padding: 8px 12px; border-radius: 8px;
               transition: 0.3s all;">View Details</a>
+          {% endif %}
 
           {% if is_writer %}
             <div style="margin-top: 0.8rem;">
@@ -52,5 +63,4 @@
     <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem; font-size: 1.1rem;">No exclusive books available yet.</p>
   {% endif %}
 </section>
-
 {% endblock %}
