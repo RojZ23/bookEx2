@@ -74,12 +74,33 @@ def displaybooks(request):
 def exclusive_book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id, is_exclusive=True)
     profile = getattr(request.user, 'userprofile', None)
-    allowed_tiers = ['Bronze', 'Silver', 'Gold']
 
-    if not profile or profile.tier not in allowed_tiers:
-        return render(request, 'permission_denied.html', {
-            'message': 'Exclusive books are available only to Bronze and higher supporters.'
+    if not profile:
+        return render(request, 'user_profile_not_found.html', {
+            'message': 'Access denied. User profile not found.'
         })
+
+    # Writers can always see the exclusive book detail page
+    if profile.role == 'Writer':
+        has_access = True
+    else:
+        required_tier = None
+        if hasattr(book, 'exclusive_meta'):
+            required_tier = book.exclusive_meta.allowed_tiers
+
+        # Check if user has the required subscription tier
+        if profile.tier != required_tier:
+            return render(request, 'subscription_tier_denied.html', {
+                'message': 'Access denied. You do not have the required subscription tier for this book.'
+            })
+
+        # For regular users, check if they have enough funds
+        if profile.role == 'Regular':
+            required_fee = SUBSCRIPTION_PRICING.get(required_tier, Decimal('0'))
+            if profile.balance < required_fee:
+                return render(request, 'insufficient_funds.html', {
+                    'message': 'Insufficient funds. Please top up your account to access this exclusive book.'
+                })
 
     ratings = Rate.objects.filter(book=book)
     avg_rating = ratings.aggregate(Avg('rating'))['rating__avg']
@@ -90,6 +111,7 @@ def exclusive_book_detail(request, book_id):
         'ratings': ratings,
         'avg_rating': avg_rating
     })
+
 
 
 def book_detail(request, book_id):
@@ -107,6 +129,7 @@ def book_detail(request, book_id):
     })
 
 
+@login_required
 def mybooks(request):
     if not request.user.is_authenticated:
         return render(request, 'bookMng/login_required.html', {
@@ -210,15 +233,29 @@ def user_settings(request):
     if request.method == 'POST':
         new_role = request.POST.get('role')
         new_tier = request.POST.get('tier')
-        # Always allow role switching
+        old_tier = profile.tier
+        old_role = profile.role
+
         if new_role in ['Regular', 'Publisher', 'Writer']:
             profile.role = new_role
-        # Only allow tier change if just became or remain Regular
+
         if profile.role == 'Regular' and new_tier in ['Free', 'Bronze', 'Silver', 'Gold']:
-            profile.tier = new_tier
+            if old_tier != new_tier:
+                # Calculate tier difference and deduct from balance
+                old_fee = SUBSCRIPTION_PRICING.get(old_tier, Decimal('0'))
+                new_fee = SUBSCRIPTION_PRICING.get(new_tier, Decimal('0'))
+                diff = new_fee - old_fee
+                if diff > 0:
+                    if profile.balance < diff:
+                        messages.error(request, 'Insufficient funds to change to this subscription tier.')
+                        return redirect('user_settings')
+                    else:
+                        profile.balance -= diff
+                profile.tier = new_tier
         # Downgrade to Free if left Regular
         if profile.role != 'Regular':
             profile.tier = 'Free'
+
         profile.save()
         messages.success(request, 'Profile updated successfully.')
         return redirect('user_settings')

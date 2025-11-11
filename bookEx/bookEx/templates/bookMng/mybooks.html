@@ -97,9 +97,15 @@
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <img src="{{ book.picture.url }}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                         <div>
+                          {% if book.is_exclusive %}
+                          <a href="{% url 'exclusive_book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
+                              {{ book.name }} <span style="color: #d9534f; font-weight: 700;">[Exclusive]</span>
+                          </a>
+                          {% else %}
                           <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
                               {{ book.name }}
                           </a>
+                          {% endif %}
                           {% if book.description %}
                           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; max-width:180px; overflow:hidden;text-overflow:ellipsis;">
                             {{ book.description|truncatechars:50 }}
@@ -148,9 +154,15 @@
                 <div class="mybook-card" data-bookname="{{ book.name|lower }}">
                     <img src="{{ book.picture.url }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                     <div style="text-align: left; max-width: 170px;">
+                        {% if book.is_exclusive %}
+                        <a href="{% url 'exclusive_book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
+                            {{ book.name }} <span style="color: #d9534f; font-weight: 700;">[Exclusive]</span>
+                        </a>
+                        {% else %}
                         <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none;">
                             {{ book.name }}
                         </a>
+                        {% endif %}
                         {% if book.description %}
                         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; max-width:150px;overflow:hidden;text-overflow:ellipsis;">
                           {{ book.description|truncatechars:50 }}
@@ -200,10 +212,16 @@
             {% if favorite_books %}
                 {% for book in favorite_books %}
                 <div class="mybook-card" data-bookname="{{ book.name|lower }}">
+                    {% if book.is_exclusive %}
+                    <a href="{% url 'exclusive_book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none; max-width: 60%;">
+                        {{ book.name }} <span style="color: #d9534f; font-weight: 700;">[Exclusive]</span>
+                    </a>
+                    {% else %}
                     <a href="{% url 'book_detail' book.id %}" class="mybook-name" style="color: var(--primary); font-weight: 600; font-size: 1rem; text-decoration: none; max-width: 60%;">
                         {{ book.name }}
                     </a>
-                    <img src="{{ book.picture.url }}" alt="{{ book.name }}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
+                    {% endif %}
+                    <img src="{{ book.picture.url }}" alt="{{ book.name }}" style="height: 70px; width: 48px; object-fit: cover; border-radius: 6px;" />
                 </div>
                 {% endfor %}
             {% else %}
