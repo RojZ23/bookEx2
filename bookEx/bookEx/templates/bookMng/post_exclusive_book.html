@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section style="max-width: 600px; margin: 3rem auto; background: var(--bg-secondary); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <h2 style="font-weight: 700; font-size: 2rem; color: var(--primary); margin-bottom: 1.5rem; text-align: center;">
+    Post Exclusive Book
+  </h2>
+
+  <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+    {% csrf_token %}
+
+    <div style="display: flex; flex-direction: column;">
+      <label for="{{ form.name.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Book Title</label>
+      {{ form.name }}
+      {% for error in form.name.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <label for="{{ form.web.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Book URL</label>
+      {{ form.web }}
+      {% for error in form.web.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <label for="{{ form.price.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Price ($)</label>
+      {{ form.price }}
+      {% for error in form.price.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <label for="{{ form.picture.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Upload Cover Image</label>
+      {{ form.picture }}
+      {% for error in form.picture.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <label for="id_allowed_tiers" style="margin-bottom: 8px; font-weight: 600;">Allowed Subscription Tier</label>
+      <select id="id_allowed_tiers" name="allowed_tiers" style="padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem;">
+        <option value="Bronze">Bronze and above</option>
+        <option value="Silver">Silver and above</option>
+        <option value="Gold">Gold only</option>
+      </select>
+    </div>
+
+    <button type="submit" style="
+      padding: 14px;
+      border-radius: 10px;
+      background-color: var(--primary);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
+      transition: background-color 0.3s, box-shadow 0.3s;">
+      Post Exclusive Book
+    </button>
+  </form>
+</section>
+
+{% endblock %}

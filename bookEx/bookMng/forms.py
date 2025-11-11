@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Book
+from .models import Book, ExclusiveBookMeta
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -22,3 +22,11 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2', 'is_publisher', 'is_writer')
+
+
+class ExclusiveBookForm(ModelForm):
+    allowed_tiers = forms.ChoiceField(choices=ExclusiveBookMeta.ALLOWED_TIERS_CHOICES)
+
+    class Meta:
+        model = Book
+        fields = ['name', 'web', 'price', 'picture']

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 850px; margin: 40px auto; background: #1e2a47; color: #f8f9fa; padding: 2rem; border-radius: 16px;">
+  <h1 style="color: #ffd700; font-size: 2.4rem;">Exclusive: {{ book.name }}</h1>
+  <p>Posted by {{ book.username }} | Price: ${{ book.price }}</p>
+  <img src="{{ book.picture.url }}" alt="{{ book.name }}" style="max-width: 250px; border-radius: 12px;">
+  <p style="margin-top: 1rem;">{{ book.description }}</p>
+
+  <form action="{% url 'add_to_cart' book.id %}" method="get" style="margin-top: 1.5rem;">
+    <button type="submit" style="background: #ffd700; color: #1e2a47; font-weight: 700; padding: 12px 24px; border-radius: 8px;">
+      Add to Cart
+    </button>
+  </form>
+</div>
+{% endblock %}

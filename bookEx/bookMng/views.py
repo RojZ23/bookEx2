@@ -20,7 +20,10 @@ from .models import UserProfile
 from django.contrib.auth import login
 from django.contrib.auth.models import Group
 from django.shortcuts import get_object_or_404, redirect
-
+from decimal import Decimal
+from .models import ExclusiveBookMeta, SUBSCRIPTION_PRICING
+from .forms import ExclusiveBookForm
+from datetime import date
 
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
@@ -57,10 +60,34 @@ def postbook(request):
     })
 
 def displaybooks(request):
-    books = Book.objects.all()
+    books = Book.objects.filter(is_exclusive=False)
     for b in books:
         b.pic_path = b.picture.url.split('/static/')[-1]
-    return render(request, 'bookMng/displaybooks.html', {'item_list': MainMenu.objects.all(), 'books': books})
+    return render(request, 'bookMng/displaybooks.html', {
+        'item_list': MainMenu.objects.all(),
+        'books': books
+    })
+
+@login_required
+def exclusive_book_detail(request, book_id):
+    book = get_object_or_404(Book, id=book_id, is_exclusive=True)
+    profile = getattr(request.user, 'userprofile', None)
+    allowed_tiers = ['Bronze', 'Silver', 'Gold']
+
+    if not profile or profile.tier not in allowed_tiers:
+        return render(request, 'permission_denied.html', {
+            'message': 'Exclusive books are available only to Bronze and higher supporters.'
+        })
+
+    ratings = Rate.objects.filter(book=book)
+    avg_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+
+    return render(request, 'bookMng/exclusive_book_detail.html', {
+        'item_list': MainMenu.objects.all(),
+        'book': book,
+        'ratings': ratings,
+        'avg_rating': avg_rating
+    })
 
 
 def book_detail(request, book_id):
@@ -78,17 +105,20 @@ def book_detail(request, book_id):
     })
 
 
-@login_required
 def mybooks(request):
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to view your books.',
+            'item_list': MainMenu.objects.all(),
+        })
+
     posted_books = Book.objects.filter(username=request.user)
     purchased_items = ShoppingCart.objects.filter(user=request.user, checked_out=True)
     purchased_books_quantities = purchased_items.values('book').annotate(total_quantity=Sum('quantity'))
 
-    # Calculate returned quantities for user
     returned_books_quantities = BookReturn.objects.filter(user=request.user).values('book').annotate(total_quantity=Sum('quantity'))
     returned_quantities = {rq['book']: rq['total_quantity'] for rq in returned_books_quantities}
 
-    # Compute net purchased quantities = purchased - returned
     purchased_quantities = {}
     for pq in purchased_books_quantities:
         book_id = pq['book']
@@ -96,14 +126,10 @@ def mybooks(request):
         if net_qty > 0:
             purchased_quantities[book_id] = net_qty
 
-    # Calculate total purchased quantity (sum of all net quantities)
     total_purchased_qty = sum(purchased_quantities.values())
-
-    # Filter purchased_books to only include books with positive net
     purchased_books = Book.objects.filter(id__in=purchased_quantities.keys())
     favorite_books = request.user.favorite_books.all()
 
-    # Use correct picture url
     for book in posted_books:
         book.pic_path = book.picture.url
     for book in purchased_books:
@@ -117,15 +143,18 @@ def mybooks(request):
         'purchased_books': purchased_books,
         'purchased_quantities': purchased_quantities,
         'favorite_books': favorite_books,
-        'total_purchased_qty': total_purchased_qty,  # pass total quantity
+        'total_purchased_qty': total_purchased_qty,
     }
     return render(request, 'bookMng/mybooks.html', context)
 
+@login_required
 def book_delete(request, book_id):
-   book = Book.objects.get(id=book_id)
-   book.delete()
-   return render(request, 'bookMng/book_delete.html', { 'item_list': MainMenu.objects.all() })
-
+    book = get_object_or_404(Book, id=book_id, username=request.user)  # Optional ownership check
+    if request.method == 'POST':
+        book.delete()
+        messages.success(request, f'Book "{book.name}" deleted successfully.')
+        return redirect('mybooks')
+    return render(request, 'bookMng/book_delete.html', {'book': book, 'item_list': MainMenu.objects.all()})
 class Register(CreateView):
     template_name = 'registration/register.html'
     form_class = UserCreationForm
@@ -171,24 +200,26 @@ def register_success(request):
 @login_required
 def user_settings(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
-
-    # Calculate total purchased quantity of books (checked_out=True)
     purchased_agg = ShoppingCart.objects.filter(user=request.user, checked_out=True).aggregate(total_purchased=Sum('quantity'))
     total_purchased = purchased_agg['total_purchased'] or 0
-
-    # Calculate total returned quantity of books
     returned_agg = BookReturn.objects.filter(user=request.user).aggregate(total_returned=Sum('quantity'))
     total_returned = returned_agg['total_returned'] or 0
 
     if request.method == 'POST':
         new_role = request.POST.get('role')
+        new_tier = request.POST.get('tier')
+        # Always allow role switching
         if new_role in ['Regular', 'Publisher', 'Writer']:
             profile.role = new_role
-            profile.save()
-            messages.success(request, 'Profile updated successfully.')
-            return redirect('user_settings')
-        else:
-            messages.error(request, 'Invalid role selected.')
+        # Only allow tier change if just became or remain Regular
+        if profile.role == 'Regular' and new_tier in ['Free', 'Bronze', 'Silver', 'Gold']:
+            profile.tier = new_tier
+        # Downgrade to Free if left Regular
+        if profile.role != 'Regular':
+            profile.tier = 'Free'
+        profile.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('user_settings')
 
     context = {
         'profile': profile,
@@ -197,8 +228,10 @@ def user_settings(request):
     }
     return render(request, 'user_settings.html', context)
 
+
 def aboutus(request):
    return render(request, 'aboutus.html', { 'item_list': MainMenu.objects.all() })
+
 
 
 def searchbooks(request):
@@ -207,7 +240,32 @@ def searchbooks(request):
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
 
+    user_profile = getattr(request.user, 'userprofile', None)
     books = Book.objects.all()
+
+    # Filter out exclusive books for non-eligible users
+    if user_profile:
+        if user_profile.role == 'Writer':
+            # Writers can see all books including exclusive
+            pass  # No filter needed here
+        elif user_profile.role == 'Regular':
+            # Regular users see only non-exclusive plus Bronze+ exclusive books
+            if user_profile.tier in ['Bronze', 'Silver', 'Gold']:
+                books = books.filter(
+                    Q(is_exclusive=False) |  # non-exclusive books
+                    Q(is_exclusive=True,
+                      exclusive_meta__allowed_tiers__in=['Bronze', 'Silver', 'Gold', 'Silver+', 'GoldOnly'])
+                )
+            else:
+                # Free tier only see non exclusive books
+                books = books.filter(is_exclusive=False)
+        else:
+            # Publishers or other roles see only non-exclusive books
+            books = books.filter(is_exclusive=False)
+    else:
+        # Not logged-in or no profile - only non-exclusive
+        books = books.filter(is_exclusive=False)
+
     if query:
         books = books.filter(name__icontains=query)
 
@@ -254,6 +312,7 @@ def searchbooks(request):
         'price_max': price_max or '',
     }
     return render(request, 'bookMng/searchbooks.html', context)
+
 
 @login_required
 def add_to_cart(request, book_id):
@@ -445,3 +504,97 @@ def edit_comment(request, comment_id):
 
     # Optionally handle GET if you want a separate edit page
     return redirect('book_detail', book_id=comment.book.id)
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def exclusive_books(request):
+    profile = request.user.userprofile
+    is_writer = profile.role == "Writer"
+
+    if profile.role == "Publisher":
+        return render(request, 'permission_denied.html', {'message': 'Access denied.'})
+
+    if profile.role == "Regular":
+        # Pause access if balance insufficient for current subscription monthly fee
+        required_fee = SUBSCRIPTION_PRICING.get(profile.tier, Decimal('0'))
+        if profile.tier == "Free" or profile.balance < required_fee:
+            return render(request, 'permission_denied.html', {
+                'message': 'Exclusive content is paused. Please deposit funds to continue access.'
+            })
+
+    # Define tiers allowed for display based on current tier
+    visible_tiers = []
+    if profile.tier == "Gold":
+        visible_tiers = ["Bronze", "Silver", "Gold", "Silver+", "GoldOnly"]
+    elif profile.tier == "Silver":
+        visible_tiers = ["Bronze", "Silver", "Silver+"]
+    elif profile.tier == "Bronze":
+        visible_tiers = ["Bronze"]
+
+    filter_tier = request.GET.get("tier")
+    search_term = request.GET.get("q")
+    books_qs = Book.objects.filter(is_exclusive=True)
+
+    if not is_writer:
+        books_qs = books_qs.filter(exclusive_meta__allowed_tiers__in=visible_tiers)
+    if filter_tier:
+        books_qs = books_qs.filter(exclusive_meta__allowed_tiers=filter_tier)
+    if search_term:
+        books_qs = books_qs.filter(name__icontains=search_term)
+
+    for book in books_qs:
+        book.pic_path = book.picture.url
+        # NEW tag if published within last 3 days
+        book.is_new = (date.today() - book.publishdate).days <= 3
+
+    context = {
+        'books': books_qs,
+        'is_writer': is_writer,
+        'visible_tiers': visible_tiers,
+    }
+    return render(request, "bookMng/exclusive_books.html", context)
+
+@login_required
+def post_exclusive_book(request):
+    profile = request.user.userprofile
+    if profile.role != "Writer":
+        return render(request, 'permission_denied.html', {'message': 'Only writers may post exclusive books.'})
+
+    if request.method == "POST":
+        form = ExclusiveBookForm(request.POST, request.FILES)
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.is_exclusive = True
+            book.username = request.user
+            book.save()
+
+            # create exclusive metadata
+            allowed_tier = form.cleaned_data['allowed_tiers']
+            ExclusiveBookMeta.objects.create(book=book, allowed_tiers=allowed_tier)
+            messages.success(request, "Exclusive book posted successfully.")
+            return redirect('exclusive_books')
+    else:
+        form = ExclusiveBookForm()
+
+    return render(request, 'bookMng/post_exclusive_book.html', {'form': form})
+
+
+
+@login_required
+def deposit_money(request):
+    if request.method == "POST":
+        try:
+            amount = Decimal(request.POST.get('amount', '0'))
+            if amount > 0:
+                profile = request.user.userprofile
+                profile.balance += amount
+                profile.save()
+                messages.success(request, "Deposit successful.")
+            else:
+                messages.error(request, "Please enter a positive amount.")
+        except Exception:
+            messages.error(request, "Invalid input.")
+        return redirect('user_settings')
+    return render(request, "bookMng/deposit_money.html")

@@ -2,15 +2,18 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import now
 from django.db.models import Avg
+from decimal import Decimal
 
 class MainMenu(models.Model):
    item = models.CharField(max_length=300, unique=True)
    link = models.CharField(max_length=300, unique=True)
 
+
    def __str__(self):
        return self.item
 
 class Book(models.Model):
+    is_exclusive = models.BooleanField(default=False)
     name = models.CharField(max_length=200)
     web = models.URLField(max_length=300)
     price = models.DecimalField(decimal_places=2, max_digits=8)
@@ -72,8 +75,46 @@ class UserProfile(models.Model):
         ('Publisher', 'Publisher'),
         ('Writer', 'Writer'),
     ]
+    TIER_CHOICES = [
+        ('Free', 'Free'),
+        ('Bronze', 'Bronze Supporter'),
+        ('Silver', 'Silver Supporter'),
+        ('Gold', 'Gold Supporter'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Regular')
+    tier = models.CharField(max_length=10, choices=TIER_CHOICES, default='Free')
+
+    balance = models.DecimalField(default=Decimal('0.00'), max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.user.username} - {self.role}"
+        return f"{self.user.username} - {self.role} ({self.tier})"
+
+SUBSCRIPTION_PRICING = {
+    'Bronze': Decimal('20.00'),
+    'Silver': Decimal('45.00'),
+    'Gold': Decimal('80.00'),
+}
+
+class ExclusiveBookMeta(models.Model):
+    ALLOWED_TIERS_CHOICES = [
+        ('Bronze', 'Bronze'),
+        ('Silver', 'Silver'),
+        ('Gold', 'Gold'),
+        ('Silver+', 'Silver+'),
+        ('GoldOnly', 'Gold only'),
+    ]
+
+    book = models.OneToOneField(Book, on_delete=models.CASCADE, related_name='exclusive_meta')
+    allowed_tiers = models.CharField(max_length=10, choices=ALLOWED_TIERS_CHOICES)
+    views_bronze = models.PositiveIntegerField(default=0)
+    views_silver = models.PositiveIntegerField(default=0)
+    views_gold = models.PositiveIntegerField(default=0)
+    favorited_bronze = models.PositiveIntegerField(default=0)
+    favorited_silver = models.PositiveIntegerField(default=0)
+    favorited_gold = models.PositiveIntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.book.name} exclusive metadata"

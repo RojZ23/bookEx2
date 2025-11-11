@@ -13,7 +13,7 @@
     <p><strong>Total Books Returned:</strong> {{ total_returned }}</p>
   </div>
 
-  <!-- Profile Role Update Form -->
+  <!-- Profile Role and Tier Update Form -->
   <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
     {% csrf_token %}
     <div style="display: flex; flex-direction: column;">
@@ -24,6 +24,17 @@
         <option value="Writer" {% if profile.role == "Writer" %}selected{% endif %}>Writer</option>
       </select>
     </div>
+    {% if profile.role == 'Regular' %}
+      <div style="display: flex; flex-direction: column;">
+        <label for="id_tier" style="margin-bottom: 8px; font-weight: 600; font-size: 1rem; color: var(--text-primary);">Support Level</label>
+        <select id="id_tier" name="tier" style="padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem; outline: none;">
+          <option value="Free" {% if profile.tier == "Free" %}selected{% endif %}>Free</option>
+          <option value="Bronze" {% if profile.tier == "Bronze" %}selected{% endif %}>Bronze</option>
+          <option value="Silver" {% if profile.tier == "Silver" %}selected{% endif %}>Silver</option>
+          <option value="Gold" {% if profile.tier == "Gold" %}selected{% endif %}>Gold</option>
+        </select>
+      </div>
+    {% endif %}
     <button type="submit" style="
       padding: 14px;
       border-radius: 10px;
@@ -37,5 +48,28 @@
       Update Profile
     </button>
   </form>
+
+  {% if profile.role == 'Regular' %}
+    <p><strong>Wallet Balance:</strong> ${{ profile.balance }}</p>
+    <a href="{% url 'deposit_money' %}" class="btn btn-secondary" style="margin-bottom: 1.5rem; display: inline-block;">Deposit Money</a>
+    <!-- navigation dropdown for regular -->
+    <div style="margin-top: 2rem;">
+      <label for="nav_dropdown" style="font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 8px; display: block;">
+        Navigate to:
+      </label>
+      <select id="nav_dropdown" name="nav_dropdown" onchange="if(this.value) window.location.href=this.value"
+              style="padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem; outline: none; width: 100%;">
+        <option value="">Select a page...</option>
+        {% if profile.tier != 'Free' %}
+          <option value="{% url 'exclusive_books' %}">Exclusive Books</option>
+        {% endif %}
+        <option value="{% url 'mybooks' %}">My Books</option>
+        <option value="{% url 'user_settings' %}">Profile Settings</option>
+      </select>
+    </div>
+  {% elif profile.role == 'Writer' %}
+    <a href="{% url 'exclusive_books' %}" class="btn btn-primary" style="display: block; margin-top: 2rem;">Go to Exclusive Books Management</a>
+  {% endif %}
+
 </section>
 {% endblock %}

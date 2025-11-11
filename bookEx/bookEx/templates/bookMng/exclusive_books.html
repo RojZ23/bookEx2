@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section style="max-width: 900px; margin: 3rem auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <h2 style="text-align: center; color: var(--primary); font-weight: 800; margin-bottom: 2rem;">
+    Exclusive Books for Supporters
+  </h2>
+
+  {% if is_writer %}
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="{% url 'post_exclusive_book' %}"
+         style="background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px;
+                text-decoration: none; font-weight: 700; box-shadow: 0 4px 12px rgba(53,112,255,0.6);">
+        Post New Exclusive Book
+      </a>
+    </div>
+  {% endif %}
+
+  {% if books %}
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+      {% for book in books %}
+        <div style="width: 180px; background: var(--bg-secondary); border-radius: 10px; padding: 1rem; box-shadow: var(--shadow); text-align: center; position: relative;">
+
+          <div style="position: absolute; top: 8px; right: 8px; background: gold; color: black; font-weight: 700; font-size: 0.8rem; padding: 3px 6px; border-radius: 4px;">
+            EXCLUSIVE
+          </div>
+
+          <img src="{{ book.picture.url }}" alt="{{ book.name }}"
+               style="width: 100%; border-radius: 8px; height: 220px; object-fit: cover; margin-bottom: 0.75rem;">
+
+          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ book.name }}
+          </h3>
+
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">By {{ book.username }}</p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${{ book.price }}</p>
+
+          <a href="{% url 'exclusive_book_detail' book.id %}" style="display: inline-block; background: var(--primary);
+              color: white; font-weight: 600; text-decoration: none; padding: 8px 12px; border-radius: 8px;
+              transition: 0.3s all;">View Details</a>
+
+          {% if is_writer %}
+            <div style="margin-top: 0.8rem;">
+              <a href="{% url 'edit_book' book.id %}" style="margin-right: 8px; color: var(--primary);">Edit</a>
+              <a href="{% url 'book_delete' book.id %}" style="color: red;">Delete</a>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem; font-size: 1.1rem;">No exclusive books available yet.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

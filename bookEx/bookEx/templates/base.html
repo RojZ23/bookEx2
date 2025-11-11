@@ -239,15 +239,23 @@
       {% endif %}
     </ul>
   </nav>
-  <div class="user-actions">
-    {% if user.is_authenticated %}
-      <span>Hello, {{ user.username }}</span>
-      <a href="{% url 'logout' %}">Logout</a>
-    {% else %}
-      <a href="{% url 'login' %}">Login</a>
-      <a href="{% url 'register' %}">Register</a>
-    {% endif %}
-  </div>
+    <div class="user-actions">
+      {% if user.is_authenticated %}
+        <span>Hello, {{ user.username }}</span>
+        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" style="background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
+            color: white; border: none; padding: 0.7rem 2rem; border-radius: 22px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; text-decoration: none; box-shadow: 0 6px 14px rgba(52,112,255, .14);
+            transition: background 0.20s, box-shadow 0.17s;">
+            Logout
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+      {% endif %}
+    </div>
 </header>
 
 <main>
