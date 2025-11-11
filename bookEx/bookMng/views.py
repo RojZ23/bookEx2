@@ -129,7 +129,7 @@ def book_detail(request, book_id):
     })
 
 
-@login_required
+
 def mybooks(request):
     if not request.user.is_authenticated:
         return render(request, 'bookMng/login_required.html', {
