@@ -51,7 +51,24 @@
 
   {% if profile.role == 'Regular' %}
     <p><strong>Wallet Balance:</strong> ${{ profile.balance }}</p>
-    <a href="{% url 'deposit_money' %}" class="btn btn-secondary" style="margin-bottom: 1.5rem; display: inline-block;">Deposit Money</a>
+
+        <form action="{% url 'deposit_money' %}" method="get" style="margin-top: 1.5rem;">
+          <button type="submit" style="
+            padding: 14px;
+            border-radius: 10px;
+            background-color: var(--primary);
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
+            transition: background-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+          ">
+            Deposit Money
+          </button>
+        </form>
+
 
     <!-- Subscription Dates -->
     {% if subscription_start %}
@@ -76,7 +93,22 @@
       </select>
     </div>
   {% elif profile.role == 'Writer' %}
-    <a href="{% url 'exclusive_books' %}" class="btn btn-primary" style="display: block; margin-top: 2rem;">Go to Exclusive Books Management</a>
+    <form action="{% url 'exclusive_books' %}" method="get" style="margin-top: 2rem;">
+      <button type="submit" style="
+        padding: 14px;
+        border-radius: 10px;
+        background-color: var(--primary);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
+        transition: background-color 0.3s, box-shadow 0.3s;
+        width: 100%;
+      ">
+        Go to Exclusive Books Management
+      </button>
+    </form>
   {% endif %}
 
 </section>
