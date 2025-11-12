@@ -519,6 +519,9 @@ def return_book(request, book_id):
         'available_to_return': available_to_return,
     })
 
+def subscription_plans(request):
+    return render(request, 'subscription_plans.html')
+
 
 def edit_book(request, book_id):
     if not request.user.is_authenticated:

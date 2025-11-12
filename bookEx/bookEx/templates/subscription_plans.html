@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .pricing-wrapper {
+      max-width: 930px;
+      margin: 2.5rem auto;
+      padding: 1.9rem 1.2rem 2.7rem 1.2rem;
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      background: linear-gradient(90deg, rgba(53, 124, 255, 0.85) 57%, rgba(246, 168, 1, 0.95) 100%); /* Slightly darker light blue shade */
+    }
+    .pricing-title {
+      font-size: 2.7rem;
+      font-weight: 900;
+      color: #fff; /* pure white for max contrast */
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-bottom: 2.7rem;
+      text-shadow: 0 0 12px rgba(0,0,0,0.8); /* strong shadow for glow and readability */
+    }
+  .pricing-cards {
+    display: flex;
+    gap: 2.2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.7rem;
+  }
+  .pricing-card {
+    border-radius: 22px;
+    box-shadow: 0 14px 42px rgba(52,112,255,0.14), 0 2px 4px #c5d8ff44;
+    border: 2.5px solid var(--border);
+    padding: 2.2rem 1.7rem 2.5rem 1.7rem;
+    min-width: 210px;
+    width: 100%;
+    max-width: 255px;
+    transition: transform 0.17s, box-shadow 0.19s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    margin-bottom: 1.9rem;
+  }
+  .pricing-card.free {
+    background: linear-gradient(145deg, #f2f3f7 90%, #fcfcfd 100%);
+    border-color: #bdbdbd;
+  }
+  .pricing-card.bronze {
+    background: linear-gradient(115deg, #ffe7c2 90%, #fff9ee 100%);
+    border-color: #c47d35;
+  }
+  .pricing-card.silver {
+    background: linear-gradient(115deg, #eef2f6 90%, #f9fafb 100%);
+    border-color: #7c86c3;
+  }
+  .pricing-card.gold {
+    background: linear-gradient(115deg, #fff7d3 90%, #fffbe5 100%);
+    border-color: #ffb100;
+    transform: scale(1.06);
+    z-index: 2;
+    box-shadow: 0 18px 60px #ffd80040, 0 4px 12px #fffec387;
+  }
+  .card-badge {
+    font-weight: 700;
+    color: #fff;
+    border-radius: 15px;
+    padding: 3.5px 15px;
+    font-size: 0.99rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.52rem;
+    background: var(--primary);
+    box-shadow: 0 2px 8px #357cff21;
+  }
+  .pricing-card.free .card-badge { background: #aaa; }
+  .pricing-card.bronze .card-badge { background: #c47d35; }
+  .pricing-card.silver .card-badge { background: #7c86c3; }
+  .pricing-card.gold .card-badge { background: #ffb100; color: #fff; }
+
+  .plan-name, .plan-price {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-align: center;
+    margin-bottom: 0.4rem;
+  }
+  .plan-name { font-size: 1.35rem; margin-top: 0.8rem;}
+  .plan-price { font-size: 1.16rem; }
+  .pricing-card.free .plan-name, .pricing-card.free .plan-price { color: #575858; }
+  .pricing-card.bronze .plan-name, .pricing-card.bronze .plan-price { color: #a86d2f; }
+  .pricing-card.silver .plan-name, .pricing-card.silver .plan-price { color: #5e6680; }
+  .pricing-card.gold .plan-name, .pricing-card.gold .plan-price { color: #e9ac0f; }
+
+  .plan-icon {
+    font-size: 2.6rem;
+    margin-bottom: 0.62rem;
+  }
+  .pricing-card.free .plan-icon { color: #a0a0a0; }
+  .pricing-card.bronze .plan-icon { color: #c47d35; }
+  .pricing-card.silver .plan-icon { color: #7c86c3; }
+  .pricing-card.gold .plan-icon { color: #e9ac0f; }
+
+  .feature-list {
+    font-size: 1rem;
+    text-align: left;
+    margin: 1.1rem 0 0.6rem 0;
+    min-height: 65px;
+  }
+  .pricing-card .feature-list {
+    color: #222;
+  }
+  .pricing-card.free .feature-list { color: #444; }
+  .pricing-card.bronze .feature-list { color: #8f601f;}
+  .pricing-card.silver .feature-list { color: #43496b;}
+  .pricing-card.gold .feature-list { color: #c28808;}
+
+  .feature-list li {
+    margin-bottom: 0.49rem;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+  .feature-list li .fa-check { color: #23bc56; font-size: 1.1rem; }
+  .feature-list li .fa-times { color: #ed4848; font-size: 1.1rem; }
+
+  .plan-cta {
+    margin-top: 1.3rem;
+    padding: 11px 2.5rem;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.07rem;
+    box-shadow: 0 3px 24px #357cff19;
+    transition: background 0.18s, color 0.18s;
+    border: none;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+  }
+  .pricing-card.free .plan-cta { background: #aaa; color: #fff; cursor:default; }
+  .pricing-card.bronze .plan-cta { background: #c47d35; color: #fff; }
+  .pricing-card.silver .plan-cta { background: #7c86c3; color: #fff; }
+  .pricing-card.gold .plan-cta { background: #ffb100; color: #fff; }
+  @media (max-width: 980px) {
+    .pricing-cards {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .pricing-card {
+      min-width: 180px;
+      max-width: 500px;
+      width: 90%;
+    }
+  }
+</style>
+
+<div class="pricing-wrapper">
+  <h2 class="pricing-title">Subscription Tiers &amp; Pricing</h2>
+  <div class="pricing-cards">
+
+    <div class="pricing-card free">
+      <div class="plan-icon"><i class="fas fa-user-friends"></i></div>
+      <div class="card-badge">No Access</div>
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0</div>
+      <ul class="feature-list">
+        <li><i class="fas fa-times"></i> Access exclusive content</li>
+        <li><i class="fas fa-times"></i> Community perks</li>
+        <li><i class="fas fa-check"></i> Standard account only</li>
+      </ul>
+      <button class="plan-cta">Current Plan</button>
+    </div>
+
+    <div class="pricing-card bronze">
+      <div class="plan-icon"><i class="fas fa-medal"></i></div>
+      <div class="card-badge">Entry Access</div>
+      <div class="plan-name">Bronze</div>
+      <div class="plan-price">$20<span style="font-size:0.92rem;">/month</span></div>
+      <ul class="feature-list">
+        <li><i class="fas fa-check"></i> Bronze-level exclusive books</li>
+        <li><i class="fas fa-check"></i> Limited monthly downloads</li>
+        <li><i class="fas fa-check"></i> Basic community content</li>
+      </ul>
+      <button class="plan-cta">Choose Bronze</button>
+    </div>
+
+    <div class="pricing-card silver">
+      <div class="plan-icon"><i class="fas fa-trophy"></i></div>
+      <div class="card-badge">Mid Access</div>
+      <div class="plan-name">Silver</div>
+      <div class="plan-price">$45<span style="font-size:0.92rem;">/month</span></div>
+      <ul class="feature-list">
+        <li><i class="fas fa-check"></i> Bronze + Silver exclusive books</li>
+        <li><i class="fas fa-check"></i> Higher download limits</li>
+        <li><i class="fas fa-check"></i> Early releases, bonus material</li>
+      </ul>
+      <button class="plan-cta">Choose Silver</button>
+    </div>
+
+    <div class="pricing-card gold">
+      <div class="plan-icon"><i class="fas fa-crown"></i></div>
+      <div class="card-badge">Full Access</div>
+      <div class="plan-name">Gold</div>
+      <div class="plan-price">$80<span style="font-size:0.92rem;">/month</span></div>
+      <ul class="feature-list">
+        <li><i class="fas fa-check"></i> All tiers (Bronze/Silver/Gold)</li>
+        <li><i class="fas fa-check"></i> Unlimited downloads</li>
+        <li><i class="fas fa-check"></i> Early access, behind-the-scenes</li>
+        <li><i class="fas fa-check"></i> Premium author content and perks</li>
+      </ul>
+      <button class="plan-cta">Go Gold</button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

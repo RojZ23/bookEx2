@@ -262,8 +262,14 @@
   {% block content %}{% endblock %}
 </main>
 
-<footer>
-  &copy; 2025 Book Exchange | All rights reserved
+<footer style="padding: 2rem 0; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; gap: 20px;">
+  <form action="{% url 'subscription_plans' %}" method="get" style="display: inline;">
+    <button type="submit"
+      style="padding: 14px 32px; border-radius: 10px; background: var(--primary); color: #fff; font-size: 1.15rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 123, 255, 0.18); border: none; transition: background 0.25s;">
+      Subscription Plans
+    </button>
+  </form>
+  <span style="color: var(--text-secondary); user-select: none;">&copy; 2025 Book Exchange | All rights reserved</span>
 </footer>
 </body>
 </html>
