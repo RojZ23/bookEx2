@@ -522,30 +522,37 @@ def return_book(request, book_id):
 
 
 
-@group_required('Writer')
-def edit_book(request, book_id):
-    book = get_object_or_404(Book, id=book_id, username=request.user)
-    old_picture = book.picture
 
+
+def edit_book(request, book_id):
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to edit books.',
+            'item_list': MainMenu.objects.all(),
+        })
+
+    # Assume your group check is similar to the @group_required decorator
+    profile = getattr(request.user, 'userprofile', None)
+    if not profile or profile.role != 'Writer':
+        return render(request, 'permission_denied.html', status=403)
+
+    book = get_object_or_404(Book, id=book_id, username=request.user)
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
             book = form.save(commit=False)
-
-            # Update or create ExclusiveBookMeta if the book is exclusive
             if book.is_exclusive:
                 allowed_tiers = request.POST.get('allowed_tiers')
-                # Create or update ExclusiveBookMeta record
                 ExclusiveBookMeta.objects.update_or_create(
                     book=book,
                     defaults={'allowed_tiers': allowed_tiers}
                 )
-            book.save()  # Save book and exclusive meta changes
+            book.save()
             return redirect('book_detail', book_id=book.id)
     else:
         form = BookForm(instance=book)
 
-    return render(request, 'bookMng/editbook.html', {'form': form})
+    return render(request, 'bookMng/editbook.html', {'form': form, 'item_list': MainMenu.objects.all()})
 
 
 

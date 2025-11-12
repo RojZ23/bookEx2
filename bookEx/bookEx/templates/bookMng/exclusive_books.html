@@ -50,12 +50,14 @@
               transition: 0.3s all;">View Details</a>
           {% endif %}
 
-          {% if is_writer %}
-            <div style="margin-top: 0.8rem;">
-              <a href="{% url 'edit_book' book.id %}" style="margin-right: 8px; color: var(--primary);">Edit</a>
-              <a href="{% url 'book_delete' book.id %}" style="color: red;">Delete</a>
-            </div>
-          {% endif %}
+            {% if user == book.username and user.userprofile.role == "Writer" %}
+              <form action="{% url 'edit_book' book.id %}" method="get" style="margin-top: 12px;">
+                <button type="submit" style="padding: 8px 18px; border-radius: 8px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer;">
+                  Edit Book
+                </button>
+              </form>
+            {% endif %}
+
         </div>
       {% endfor %}
     </div>
