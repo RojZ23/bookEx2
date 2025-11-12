@@ -304,6 +304,8 @@ def aboutus(request):
    return render(request, 'aboutus.html', { 'item_list': MainMenu.objects.all() })
 
 
+from django.db.models import Count, Q, Avg
+
 def searchbooks(request):
     query = request.GET.get('q')
     min_rating = request.GET.get('min_rating')
@@ -313,7 +315,6 @@ def searchbooks(request):
     user_profile = getattr(request.user, 'userprofile', None)
     books = Book.objects.all()
 
-    # Define tier hierarchy rank: lower number is lower tier
     tier_rank = {
         'Free': 0,
         'Bronze': 1,
@@ -328,24 +329,19 @@ def searchbooks(request):
         user_tier_rank = tier_rank.get(user_tier, -1)
 
         if user_profile.role == 'Writer':
-            # Writers see all books
-            pass
+            pass  # Writers see all books
         elif user_profile.role == 'Regular':
-            # For Regular users, show non-exclusive plus exclusive allowed by user's tier
-            if user_tier_rank >= 0:
-                # Filter exclusive books whose allowed tier rank <= user tier rank
+            if user_tier_rank > 0:
                 allowed_tier_books = []
                 for tier_key, rank in tier_rank.items():
                     if rank <= user_tier_rank and tier_key not in ['Free']:
                         allowed_tier_books.append(Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key))
 
                 if allowed_tier_books:
-                    # Combine all allowed tiers with OR
-                    books = books.filter(
-                        Q(is_exclusive=False) | allowed_tier_books.pop()
-                    )
-                    for q in allowed_tier_books:
-                        books = books | Book.objects.filter(q)
+                    query_filter = Q(is_exclusive=False)
+                    for q_filter in allowed_tier_books:
+                        query_filter |= q_filter
+                    books = books.filter(query_filter)
                 else:
                     books = books.filter(is_exclusive=False)
             else:
@@ -354,9 +350,10 @@ def searchbooks(request):
             # Publishers or other roles see only non-exclusive
             books = books.filter(is_exclusive=False)
     else:
-        # Anonymous users see only non-exclusive
+        # Anonymous sees only non-exclusive
         books = books.filter(is_exclusive=False)
 
+    # Apply search filters to main books queryset
     if query:
         books = books.filter(name__icontains=query)
 
@@ -385,14 +382,55 @@ def searchbooks(request):
 
     books = books.prefetch_related('comments')
 
+    # Set pic_path for books
     for book in books:
         if book.picture:
             book.pic_path = book.picture.url.split('/static/')[-1]
         else:
             book.pic_path = 'default.jpg'
-
         if book.avg_rating_value is None:
             book.avg_rating_value = None
+
+    # Recommended books queryset: same user tier filtering, plus rating >= 3 or comments >= 3
+    recommended_books = Book.objects.all()
+
+    if user_profile:
+        if user_profile.role == 'Writer':
+            pass
+        elif user_profile.role == 'Regular':
+            if user_tier_rank > 0:
+                allowed_tier_books = []
+                for tier_key, rank in tier_rank.items():
+                    if rank <= user_tier_rank and tier_key not in ['Free']:
+                        allowed_tier_books.append(Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key))
+
+                if allowed_tier_books:
+                    query_filter = Q(is_exclusive=False)
+                    for q_filter in allowed_tier_books:
+                        query_filter |= q_filter
+                    recommended_books = recommended_books.filter(query_filter)
+                else:
+                    recommended_books = recommended_books.filter(is_exclusive=False)
+            else:
+                recommended_books = recommended_books.filter(is_exclusive=False)
+        else:
+            recommended_books = recommended_books.filter(is_exclusive=False)
+    else:
+        recommended_books = recommended_books.filter(is_exclusive=False)
+
+    # Additional filter for rating >= 3 or comments_count >= 3
+    recommended_books = recommended_books.annotate(
+        avg_rating=Avg('rate__rating'),
+        comments_count=Count('comments')
+    ).filter(
+        Q(avg_rating__gte=3) | Q(comments_count__gte=3)
+    ).prefetch_related('comments')
+
+    for book in recommended_books:
+        if book.picture:
+            book.pic_path = book.picture.url.split('/static/')[-1]
+        else:
+            book.pic_path = 'default.jpg'
 
     context = {
         'books': books,
@@ -400,6 +438,7 @@ def searchbooks(request):
         'min_rating': min_rating or 'none',
         'price_min': price_min or '',
         'price_max': price_max or '',
+        'recommended_books': recommended_books,
     }
     return render(request, 'bookMng/searchbooks.html', context)
 
