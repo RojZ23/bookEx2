@@ -313,20 +313,42 @@ def searchbooks(request):
     user_profile = getattr(request.user, 'userprofile', None)
     books = Book.objects.all()
 
+    # Define tier hierarchy rank: lower number is lower tier
+    tier_rank = {
+        'Free': 0,
+        'Bronze': 1,
+        'Silver': 2,
+        'Gold': 3,
+        'Silver+': 2,
+        'GoldOnly': 3,
+    }
+
     if user_profile:
+        user_tier = user_profile.tier
+        user_tier_rank = tier_rank.get(user_tier, -1)
+
         if user_profile.role == 'Writer':
-            # Writers can see all books
+            # Writers see all books
             pass
         elif user_profile.role == 'Regular':
             # For Regular users, show non-exclusive plus exclusive allowed by user's tier
-            allowed_tier = user_profile.tier
-            if allowed_tier in ['Bronze', 'Silver', 'Gold', 'Silver+', 'GoldOnly']:
-                books = books.filter(
-                    Q(is_exclusive=False) |
-                    Q(is_exclusive=True, exclusive_meta__allowed_tiers=allowed_tier)
-                )
+            if user_tier_rank >= 0:
+                # Filter exclusive books whose allowed tier rank <= user tier rank
+                allowed_tier_books = []
+                for tier_key, rank in tier_rank.items():
+                    if rank <= user_tier_rank and tier_key not in ['Free']:
+                        allowed_tier_books.append(Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key))
+
+                if allowed_tier_books:
+                    # Combine all allowed tiers with OR
+                    books = books.filter(
+                        Q(is_exclusive=False) | allowed_tier_books.pop()
+                    )
+                    for q in allowed_tier_books:
+                        books = books | Book.objects.filter(q)
+                else:
+                    books = books.filter(is_exclusive=False)
             else:
-                # Free tier or others see only non-exclusive
                 books = books.filter(is_exclusive=False)
         else:
             # Publishers or other roles see only non-exclusive
@@ -340,7 +362,6 @@ def searchbooks(request):
 
     books = books.annotate(avg_rating_value=Avg('rate__rating'))
 
-    # Further filters (rating, price) unchanged
     if min_rating and min_rating != 'none':
         try:
             min_rating_float = float(min_rating)
@@ -368,7 +389,8 @@ def searchbooks(request):
         if book.picture:
             book.pic_path = book.picture.url.split('/static/')[-1]
         else:
-            book.pic_path = 'default.jpg'  # fallback image path
+            book.pic_path = 'default.jpg'
+
         if book.avg_rating_value is None:
             book.avg_rating_value = None
 
@@ -380,6 +402,7 @@ def searchbooks(request):
         'price_max': price_max or '',
     }
     return render(request, 'bookMng/searchbooks.html', context)
+
 
 
 @login_required
