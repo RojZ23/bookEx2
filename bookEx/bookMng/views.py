@@ -225,38 +225,69 @@ def register_success(request):
 @login_required
 def user_settings(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+
     purchased_agg = ShoppingCart.objects.filter(user=request.user, checked_out=True).aggregate(total_purchased=Sum('quantity'))
     total_purchased = purchased_agg['total_purchased'] or 0
     returned_agg = BookReturn.objects.filter(user=request.user).aggregate(total_returned=Sum('quantity'))
     total_returned = returned_agg['total_returned'] or 0
 
+    today = date.today()
+
+    # Monthly deduction (occurs separately)
+    if profile.role == 'Regular' and profile.tier in ['Bronze', 'Silver', 'Gold']:
+        deduct_amount = SUBSCRIPTION_PRICING.get(profile.tier, Decimal('0'))
+        if profile.last_deduction_date is None or (today - profile.last_deduction_date).days >= 30:
+            if profile.balance >= deduct_amount:
+                profile.balance -= deduct_amount
+                profile.last_deduction_date = today
+                profile.save()
+                messages.info(request, f'Monthly subscription fee of ${deduct_amount} deducted.')
+            else:
+                profile.tier = 'Free'
+                profile.subscription_start = None
+                profile.last_deduction_date = None
+                profile.save()
+                messages.warning(request, 'Insufficient funds for monthly fee. Downgraded to Free.')
+
     if request.method == 'POST':
         new_role = request.POST.get('role')
         new_tier = request.POST.get('tier')
         old_tier = profile.tier
-        old_role = profile.role
 
         if new_role in ['Regular', 'Publisher', 'Writer']:
             profile.role = new_role
 
         if profile.role == 'Regular' and new_tier in ['Free', 'Bronze', 'Silver', 'Gold']:
             if old_tier != new_tier:
-                # Calculate tier difference and deduct from balance
-                old_fee = SUBSCRIPTION_PRICING.get(old_tier, Decimal('0'))
                 new_fee = SUBSCRIPTION_PRICING.get(new_tier, Decimal('0'))
-                diff = new_fee - old_fee
-                if diff > 0:
-                    if profile.balance < diff:
-                        messages.error(request, 'Insufficient funds to change to this subscription tier.')
-                        return redirect('user_settings')
-                    else:
-                        profile.balance -= diff
-                profile.tier = new_tier
-        # Downgrade to Free if left Regular
-        if profile.role != 'Regular':
-            profile.tier = 'Free'
 
-        profile.save()
+                # Deduct full new subscription price immediately (no refunds)
+                if profile.balance < new_fee:
+                    messages.error(request, 'Insufficient funds to change to this subscription tier.')
+                    return redirect('user_settings')
+                else:
+                    # Charge full new tier amount
+                    profile.balance -= new_fee
+
+                    # Update tier info and subscription dates
+                    profile.tier = new_tier
+                    profile.subscription_start = today
+                    profile.last_deduction_date = today
+                    profile.save()
+
+                    messages.success(request, f'You have been charged ${new_fee} for the {new_tier} subscription tier.')
+
+        elif profile.role != 'Regular':
+            # Reset tier and subscription for non-regular users
+            profile.tier = 'Free'
+            profile.subscription_start = None
+            profile.last_deduction_date = None
+            profile.save()
+
+        else:
+            # If tier unchanged, just save role change
+            profile.save()
+
         messages.success(request, 'Profile updated successfully.')
         return redirect('user_settings')
 
@@ -264,9 +295,10 @@ def user_settings(request):
         'profile': profile,
         'total_purchased': total_purchased,
         'total_returned': total_returned,
+        'subscription_start': profile.subscription_start,
+        'last_deduction_date': profile.last_deduction_date,
     }
     return render(request, 'user_settings.html', context)
-
 
 def aboutus(request):
    return render(request, 'aboutus.html', { 'item_list': MainMenu.objects.all() })

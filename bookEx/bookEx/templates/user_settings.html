@@ -52,7 +52,15 @@
   {% if profile.role == 'Regular' %}
     <p><strong>Wallet Balance:</strong> ${{ profile.balance }}</p>
     <a href="{% url 'deposit_money' %}" class="btn btn-secondary" style="margin-bottom: 1.5rem; display: inline-block;">Deposit Money</a>
-    <!-- navigation dropdown for regular -->
+
+    <!-- Subscription Dates -->
+    {% if subscription_start %}
+      <p><strong>Subscription Started On:</strong> {{ subscription_start }}</p>
+    {% endif %}
+    {% if last_deduction_date %}
+      <p><strong>Last Monthly Payment Deducted On:</strong> {{ last_deduction_date }}</p>
+    {% endif %}
+
     <div style="margin-top: 2rem;">
       <label for="nav_dropdown" style="font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 8px; display: block;">
         Navigate to:

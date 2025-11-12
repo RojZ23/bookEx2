@@ -85,7 +85,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Regular')
     tier = models.CharField(max_length=10, choices=TIER_CHOICES, default='Free')
-
+    subscription_start = models.DateField(null=True, blank=True)
+    last_deduction_date = models.DateField(null=True, blank=True)
     balance = models.DecimalField(default=Decimal('0.00'), max_digits=10, decimal_places=2)
 
     def __str__(self):
