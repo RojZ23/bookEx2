@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Subscription Required{% endblock %}
+
+{% block content %}
+<section style="
+    max-width: 600px;
+    margin: 4rem auto;
+    background: var(--bg-secondary);
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--primary);
+">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtwQnkB9EoFYOc7fSRNLvHtNwWuD4x5P6jNQ&s" alt="Subscription Required Icon" style="max-width: 250px; margin-bottom: 1.5rem;">
+
+    <i class="fas fa-lock" style="font-size: 3rem; color: var(--primary-dark); margin: 1rem auto 0 auto; display: block;"></i>
+
+    <p style="margin-top: 1rem;">
+      You need to be either a <strong>Writer</strong> or a <strong>Regular user with an active subscription</strong> to access exclusive books.
+    </p>
+</section>
+{% endblock %}

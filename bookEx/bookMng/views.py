@@ -612,7 +612,7 @@ def exclusive_books(request):
     is_writer = profile.role == "Writer"
 
     if profile.role == "Publisher":
-        return render(request, 'permission_denied.html', {'message': 'Access denied.'})
+        return render(request, 'subscription_required.html', {'message': 'Access denied.'})
 
     if profile.role == "Regular":
         # Pause access if balance insufficient for current subscription monthly fee
