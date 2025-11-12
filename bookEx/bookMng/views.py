@@ -520,10 +520,6 @@ def return_book(request, book_id):
     })
 
 
-
-
-
-
 def edit_book(request, book_id):
     if not request.user.is_authenticated:
         return render(request, 'bookMng/login_required.html', {
@@ -531,12 +527,19 @@ def edit_book(request, book_id):
             'item_list': MainMenu.objects.all(),
         })
 
-    # Assume your group check is similar to the @group_required decorator
     profile = getattr(request.user, 'userprofile', None)
     if not profile or profile.role != 'Writer':
         return render(request, 'permission_denied.html', status=403)
 
     book = get_object_or_404(Book, id=book_id, username=request.user)
+
+    # Preload allowed_tiers into the book instance for form display if exclusive
+    if book.is_exclusive:
+        try:
+            book.allowed_tiers = book.exclusive_meta.allowed_tiers
+        except ExclusiveBookMeta.DoesNotExist:
+            book.allowed_tiers = None
+
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
@@ -552,8 +555,11 @@ def edit_book(request, book_id):
     else:
         form = BookForm(instance=book)
 
-    return render(request, 'bookMng/editbook.html', {'form': form, 'item_list': MainMenu.objects.all()})
-
+    context = {
+        'form': form,
+        'item_list': MainMenu.objects.all(),
+    }
+    return render(request, 'bookMng/editbook.html', context)
 
 
 @group_required('Publisher', 'Writer')
