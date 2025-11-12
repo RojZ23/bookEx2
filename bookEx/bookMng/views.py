@@ -520,7 +520,8 @@ def return_book(request, book_id):
     })
 
 
-@login_required
+
+
 @group_required('Writer')
 def edit_book(request, book_id):
     book = get_object_or_404(Book, id=book_id, username=request.user)
@@ -544,7 +545,7 @@ def edit_book(request, book_id):
     else:
         form = BookForm(instance=book)
 
-    return render(request, 'editbook.html', {'form': form})
+    return render(request, 'bookMng/editbook.html', {'form': form})
 
 
 
@@ -601,7 +602,7 @@ def exclusive_books(request):
         # Pause access if balance insufficient for current subscription monthly fee
         required_fee = SUBSCRIPTION_PRICING.get(profile.tier, Decimal('0'))
         if profile.tier == "Free" or profile.balance < required_fee:
-            return render(request, 'permission_denied.html', {
+            return render(request, 'insufficient_funds.html', {
                 'message': 'Exclusive content is paused. Please deposit funds to continue access.'
             })
 
