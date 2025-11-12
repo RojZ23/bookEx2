@@ -4,11 +4,12 @@
 <section style="
   max-width: 400px;
   margin: 3rem auto;
-  padding: 2rem 2.5rem;
-  background: var(--glass-bg);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, rgba(53,124,255,0.1), rgba(246,168,1,0.15));
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(53,124,255,0.18), inset 0 0 8px rgba(246,168,1,0.12);
   font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  color: var(--text-primary);
 ">
   <h2 style="
     text-align: center;
@@ -17,6 +18,7 @@
     font-size: 2rem;
     margin-bottom: 2rem;
     letter-spacing: 1px;
+    text-shadow: 1px 1px 4px rgba(247,168,1,0.4);
   ">
     Deposit Money
   </h2>
@@ -24,9 +26,9 @@
     {% csrf_token %}
     <label for="amount" style="
       font-weight: 600;
-      color: var(--text-primary);
       font-size: 1.1rem;
       margin-bottom: 0.5rem;
+      color: var(--text-primary);
     ">Amount to Deposit ($):</label>
     <input
       type="number"
