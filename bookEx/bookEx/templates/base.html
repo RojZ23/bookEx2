@@ -20,10 +20,13 @@
       --shadow: 0 4px 18px rgba(52,112,255, 0.15);
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
+    /*@media (prefers-color-scheme: dark) {*/
+      .dark-mode {/*:root {*/
+        --bg-primary: #181F2A;
+        --bg-secondary: #222C3A;
         --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
         --glass-bg: rgba(50,60,90,0.80);
+        --bg-glass: rgba(36,41,58,0.84);
         --text-primary: #e3e7ec;
         --text-secondary: #bacbe8;
         --text-tertiary: #899cc2;
@@ -203,6 +206,43 @@
     }
   </style>
 </head>
+
+<!-- Script for light/dark mode button -->  
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    let theme = localStorage.getItem('theme');
+
+    if(!theme){
+        theme = 'dark';
+        localStorage.setItem('theme', theme);
+        icon.classList.replace('fa-sun', 'fa-moon');
+    }
+
+    const isDark = theme === 'dark';
+
+    if (isDark) {
+      document.body.classList.add('dark-mode');
+      icon.classList.replace('fa-sun', 'fa-moon');
+    }else{
+        document.body.style.backgroundColor =
+        icon.classList.replace('fa-moon', 'fa-sun');
+
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const darkModeOn = document.body.classList.contains('dark-mode');
+
+      icon.classList.toggle('fa-moon', darkModeOn);
+      icon.classList.toggle('fa-sun', !darkModeOn);
+
+      localStorage.setItem('theme', darkModeOn ? 'dark' : 'light');
+    });
+  });
+</script>
+  
 <body>
 <header>
   <div class="logo">
@@ -256,6 +296,13 @@
         <a href="{% url 'register' %}">Register</a>
       {% endif %}
     </div>
+
+  <!--Button of light/dark mode-->
+  <button id="theme-toggle" aria-label="Toggle theme"
+    style="background: none; border: none; cursor: pointer; font-size: 1.4rem; color: var(--text-tertiary);">
+    <i id="theme-icon" class="fas fa-moon"></i>
+  </button>  
+  
 </header>
 
 <main>
