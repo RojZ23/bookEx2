@@ -10,11 +10,10 @@
     :root {
       --primary: #357CFF;
       --primary-dark: #256adf;
-      --accent: #F6A801;
+      --accent: #f8f0fc;
       --text-primary: #23272F;
       --text-secondary: #6e7b8b;
       --text-tertiary: #a1adbd;
-      --bg-gradient: linear-gradient(120deg, #e3f0ff 0%, #d6eaff 54%, #fdfaef 100%);
       --glass-bg: rgba(255,255,255,0.85);
       --border: #c2dafc;
       --shadow: 0 4px 18px rgba(52,112,255, 0.15);
@@ -22,7 +21,6 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
         --glass-bg: rgba(50,60,90,0.80);
         --text-primary: #e3e7ec;
         --text-secondary: #bacbe8;
@@ -40,7 +38,6 @@
 
     body {
       min-height: 100vh;
-      background: var(--bg-gradient);
       color: var(--text-primary);
       line-height: 1.5;
       display: flex;
@@ -112,7 +109,6 @@
       bottom: -3.5px; left: 7px;
       width: 70%;
       height: 3px;
-      background: linear-gradient(90deg, var(--primary) 57%, var(--accent) 100%);
       border-radius: 10px;
       box-shadow: 0 2px 7px rgba(52,112,255,0.13);
     }
@@ -133,7 +129,6 @@
 
     .user-actions a,
     .user-actions button {
-      background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
       color: white;
       border: none;
       padding: 0.7rem 2rem;
@@ -201,6 +196,64 @@
       .user-actions a, .user-actions button {padding: 0.52rem 1rem;font-size: 0.95rem;}
       main {padding: 1rem 2vw;}
     }
+      /* BUTTON COLOR UPDATE — DARK BLUE → LIGHT BLUE ON HOVER */
+:root {
+    --button-dark: #1F3AFF;   /* primary dark blue */
+    --button-light: #4A6CFF;  /* lighter blue on hover */
+}
+
+/* ALL USER-ACTION BUTTONS (Login, Register, Logout) */
+.user-actions a,
+.user-actions button {
+    background: var(--button-dark) !important;
+    color: white !important;
+    border: none;
+    padding: 0.7rem 2rem;
+    border-radius: 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 6px 14px rgba(31, 58, 255, 0.25);
+    transition: background 0.20s ease, transform 0.17s ease;
+}
+
+/* HOVER / PRESSED STATE */
+.user-actions a:hover,
+.user-actions button:hover {
+    background: var(--button-light) !important;
+    transform: scale(1.03);
+}
+
+
+/* SUBSCRIPTION BUTTON IN FOOTER */
+footer button {
+    background: var(--button-dark) !important;
+    color: white !important;
+    box-shadow: 0 6px 18px rgba(31, 58, 255, 0.22);
+    transition: background .25s, transform .22s;
+}
+
+footer button:hover {
+    background: var(--button-light) !important;
+    transform: translateY(-2px);
+}
+
+
+/* ANY OTHER COMMON BUTTONS (OPTIONAL BUT SAFE) */
+button,
+.btn {
+    background: var(--button-dark) !important;
+    color: white !important;
+    border: none !important;
+    transition: background .22s ease;
+}
+
+button:hover,
+.btn:hover {
+    background: var(--button-light) !important;
+}
+
   </style>
 </head>
 <body>
