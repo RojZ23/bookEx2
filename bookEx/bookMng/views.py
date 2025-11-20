@@ -875,7 +875,7 @@ def chatbot_api(request):
 You are a helpful assistant for a book exchange website. You know about the books available and site features like searching, posting, and user tiers.
 Books currently available: {books_info}
 User question: {user_msg}
-Answer clearly based on books and website features only. Do not mention anything outside this site.
+Answer clearly based on books, subscription tiers of this website, and website features only. Do not mention anything outside this site.
 """
 
         # Call OpenRouter.ai GPT-4o-mini model with this prompt
