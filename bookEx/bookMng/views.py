@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import MainMenu, Rate
 from .forms import BookForm
 from django.http import HttpResponseRedirect
@@ -24,6 +26,9 @@ from decimal import Decimal
 from .models import ExclusiveBookMeta, SUBSCRIPTION_PRICING
 from .forms import ExclusiveBookForm
 from datetime import date
+import json
+from django.conf import settings
+import requests
 
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
@@ -306,6 +311,158 @@ def aboutus(request):
 
 from django.db.models import Count, Q, Avg
 
+
+TIER_RANK = {
+    'Free': 0,
+    'Bronze': 1,
+    'Silver': 2,
+    'Gold': 3,
+    'Silver+': 2,
+    'GoldOnly': 3,
+}
+
+
+def _apply_exclusive_filter(queryset, user_profile):
+    """
+    Apply your existing exclusive-visibility rules to a queryset.
+    Writers see all; Regular users limited by tier; others see non-exclusive only.
+    """
+    if not user_profile:
+        # Anonymous: only non-exclusive
+        return queryset.filter(is_exclusive=False)
+
+    user_tier = user_profile.tier
+    user_tier_rank = TIER_RANK.get(user_tier, -1)
+
+    if user_profile.role == 'Writer':
+        # Writers see everything
+        return queryset
+
+    if user_profile.role == 'Regular':
+        if user_tier_rank > 0:
+            allowed_tier_books_q = []
+            for tier_key, rank in TIER_RANK.items():
+                if rank <= user_tier_rank and tier_key not in ['Free']:
+                    allowed_tier_books_q.append(
+                        Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key)
+                    )
+            if allowed_tier_books_q:
+                query_filter = Q(is_exclusive=False)
+                for q_filter in allowed_tier_books_q:
+                    query_filter |= q_filter
+                return queryset.filter(query_filter)
+            else:
+                return queryset.filter(is_exclusive=False)
+        else:
+            return queryset.filter(is_exclusive=False)
+
+    # Publishers or other roles: only non-exclusive
+    return queryset.filter(is_exclusive=False)
+
+
+def _build_ai_recommendations(filtered_qs, user_profile, query):
+    """
+    Use OpenRouter gpt-4o-mini to pick a subset and ranking of books
+    from filtered_qs (already includes search + filters + tier rules).
+    Only uses local DB data (no external books).
+    """
+    # Start from the same filtered queryset, then narrow to "good" candidates
+    candidates = list(
+        filtered_qs.annotate(
+            avg_rating=Avg('rate__rating'),
+            comments_count=Count('comments')
+        ).filter(
+            Q(avg_rating__gte=3) | Q(comments_count__gte=3)
+        )
+    )
+
+    if not candidates:
+        return []
+
+    books_payload = []
+    for b in candidates:
+        books_payload.append({
+            "id": b.id,
+            "name": b.name,
+            "price": float(b.price),
+            "avg_rating": float(b.avg_rating) if b.avg_rating is not None else 0.0,
+            "comments_count": int(b.comments_count or 0),
+        })
+
+    user_tier = getattr(user_profile, "tier", "Anonymous") if user_profile else "Anonymous"
+    prompt = (
+        "You are a book recommendation engine for a private site. "
+        "You must ONLY recommend book IDs that are provided in the JSON list. "
+        "Each book has fields: id, name, price, avg_rating, comments_count. "
+        "Prefer books with higher avg_rating and more comments. "
+        "If the user search query is non-empty, prefer books whose name semantically matches the query. "
+        "User tier: " + str(user_tier) + ". "
+        "Return a JSON list of at most 10 book IDs in descending recommendation order, "
+        "no explanations, no extra keys.\n\n"
+        "User search query: " + (query or "") + "\n\n"
+        "Books JSON:\n" + json.dumps(books_payload, ensure_ascii=False)
+    )
+
+    api_key = getattr(settings, "OPENROUTER_API_KEY", None)
+
+    # Fallback ranking if API key missing or request fails
+    def fallback_order():
+        return [
+            b.id for b in sorted(
+                candidates,
+                key=lambda x: (
+                    -(x.avg_rating or 0.0),
+                    -(x.comments_count or 0),
+                )
+            )
+        ]
+
+    if not api_key:
+        recommended_ids = fallback_order()
+    else:
+        try:
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": "You are a strict JSON API."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.1,
+                },
+                timeout=15,
+            )
+            resp.raise_for_status()
+            content = resp.json()["choices"][0]["message"]["content"]
+            recommended_ids = json.loads(content)
+            if not isinstance(recommended_ids, list):
+                recommended_ids = []
+            recommended_ids = [int(i) for i in recommended_ids if isinstance(i, (int, str))]
+        except Exception:
+            recommended_ids = fallback_order()
+
+    if not recommended_ids:
+        return []
+
+    # Keep only ids that are in candidates
+    candidate_ids = {b.id for b in candidates}
+    recommended_ids = [bid for bid in recommended_ids if bid in candidate_ids]
+
+    preserved_order = {bid: idx for idx, bid in enumerate(recommended_ids)}
+    # Pull from filtered_qs so all filters/tier rules stay applied
+    qs = filtered_qs.filter(id__in=recommended_ids).annotate(
+        avg_rating=Avg('rate__rating'),
+        comments_count=Count('comments')
+    )
+    books_list = sorted(qs, key=lambda b: preserved_order.get(b.id, 10**9))
+    return books_list
+
+
 def searchbooks(request):
     query = request.GET.get('q')
     min_rating = request.GET.get('min_rating')
@@ -313,52 +470,18 @@ def searchbooks(request):
     price_max = request.GET.get('price_max')
 
     user_profile = getattr(request.user, 'userprofile', None)
-    books = Book.objects.all()
 
-    tier_rank = {
-        'Free': 0,
-        'Bronze': 1,
-        'Silver': 2,
-        'Gold': 3,
-        'Silver+': 2,
-        'GoldOnly': 3,
-    }
+    # 1) Base queryset with exclusive rules
+    books = _apply_exclusive_filter(Book.objects.all(), user_profile)
 
-    if user_profile:
-        user_tier = user_profile.tier
-        user_tier_rank = tier_rank.get(user_tier, -1)
-
-        if user_profile.role == 'Writer':
-            pass  # Writers see all books
-        elif user_profile.role == 'Regular':
-            if user_tier_rank > 0:
-                allowed_tier_books = []
-                for tier_key, rank in tier_rank.items():
-                    if rank <= user_tier_rank and tier_key not in ['Free']:
-                        allowed_tier_books.append(Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key))
-
-                if allowed_tier_books:
-                    query_filter = Q(is_exclusive=False)
-                    for q_filter in allowed_tier_books:
-                        query_filter |= q_filter
-                    books = books.filter(query_filter)
-                else:
-                    books = books.filter(is_exclusive=False)
-            else:
-                books = books.filter(is_exclusive=False)
-        else:
-            # Publishers or other roles see only non-exclusive
-            books = books.filter(is_exclusive=False)
-    else:
-        # Anonymous sees only non-exclusive
-        books = books.filter(is_exclusive=False)
-
-    # Apply search filters to main books queryset
+    # 2) Apply text search
     if query:
         books = books.filter(name__icontains=query)
 
+    # 3) Annotate for rating
     books = books.annotate(avg_rating_value=Avg('rate__rating'))
 
+    # 4) Apply rating filter
     if min_rating and min_rating != 'none':
         try:
             min_rating_float = float(min_rating)
@@ -366,6 +489,7 @@ def searchbooks(request):
         except ValueError:
             pass
 
+    # 5) Apply price filters
     if price_min:
         try:
             price_min_val = float(price_min)
@@ -380,9 +504,10 @@ def searchbooks(request):
         except ValueError:
             pass
 
+    # 6) Prefetch comments for display
     books = books.prefetch_related('comments')
 
-    # Set pic_path for books
+    # 7) Picture path + avg_rating_value cleanup for search list
     for book in books:
         if book.picture:
             book.pic_path = book.picture.url.split('/static/')[-1]
@@ -391,41 +516,11 @@ def searchbooks(request):
         if book.avg_rating_value is None:
             book.avg_rating_value = None
 
-    # Recommended books queryset: same user tier filtering, plus rating >= 3 or comments >= 3
-    recommended_books = Book.objects.all()
+    # 8) Recommended books use THE SAME filtered queryset (`books`)
+    #    so search query + min_rating + price range all affect recommendations.
+    recommended_books = _build_ai_recommendations(books, user_profile, query)
 
-    if user_profile:
-        if user_profile.role == 'Writer':
-            pass
-        elif user_profile.role == 'Regular':
-            if user_tier_rank > 0:
-                allowed_tier_books = []
-                for tier_key, rank in tier_rank.items():
-                    if rank <= user_tier_rank and tier_key not in ['Free']:
-                        allowed_tier_books.append(Q(is_exclusive=True, exclusive_meta__allowed_tiers=tier_key))
-
-                if allowed_tier_books:
-                    query_filter = Q(is_exclusive=False)
-                    for q_filter in allowed_tier_books:
-                        query_filter |= q_filter
-                    recommended_books = recommended_books.filter(query_filter)
-                else:
-                    recommended_books = recommended_books.filter(is_exclusive=False)
-            else:
-                recommended_books = recommended_books.filter(is_exclusive=False)
-        else:
-            recommended_books = recommended_books.filter(is_exclusive=False)
-    else:
-        recommended_books = recommended_books.filter(is_exclusive=False)
-
-    # Additional filter for rating >= 3 or comments_count >= 3
-    recommended_books = recommended_books.annotate(
-        avg_rating=Avg('rate__rating'),
-        comments_count=Count('comments')
-    ).filter(
-        Q(avg_rating__gte=3) | Q(comments_count__gte=3)
-    ).prefetch_related('comments')
-
+    # 9) Picture path for recommended list
     for book in recommended_books:
         if book.picture:
             book.pic_path = book.picture.url.split('/static/')[-1]
@@ -759,3 +854,52 @@ def deposit_money(request):
             messages.error(request, "Invalid input.")
         return redirect('user_settings')
     return render(request, "bookMng/deposit_money.html")
+
+@csrf_exempt
+def chatbot_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        user_msg = data.get('message', '').strip()
+        if not user_msg:
+            return JsonResponse({'reply': "Please ask a question."})
+
+        # Fetch books info to create context for AI
+        books = Book.objects.all().values('name', 'price')
+
+        books_info = "; ".join([f"{b['name']} priced at ${b['price']}" for b in books[:50]])  # limit length
+
+        prompt = f"""
+You are a helpful assistant for a book exchange website. You know about the books available and site features like searching, posting, and user tiers.
+Books currently available: {books_info}
+User question: {user_msg}
+Answer clearly based on books and website features only. Do not mention anything outside this site.
+"""
+
+        # Call OpenRouter.ai GPT-4o-mini model with this prompt
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": "You are a concise helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 300,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        ai_reply = response.json()['choices'][0]['message']['content'].strip()
+
+    except Exception as e:
+        ai_reply = "Sorry, I am unable to answer right now."
+
+    return JsonResponse({'reply': ai_reply})

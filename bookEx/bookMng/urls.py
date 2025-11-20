@@ -29,6 +29,6 @@ urlpatterns = [
    path('post-exclusive-book/', views.post_exclusive_book, name='post_exclusive_book'),
    path('deposit-money/', views.deposit_money, name='deposit_money'),
    path('exclusive/<int:book_id>/', views.exclusive_book_detail, name='exclusive_book_detail'),
-   path('subscription-plans/', views.subscription_plans, name='subscription_plans')
-
+   path('subscription-plans/', views.subscription_plans, name='subscription_plans'),
+   path('chatbot/api/', views.chatbot_api, name='chatbot_api'),
 ]

@@ -261,6 +261,79 @@
 <main>
   {% block content %}{% endblock %}
 </main>
+<!-- Chatbot icon (click to toggle chat window) -->
+<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1500; max-width: 350px; font-family: 'Inter', sans-serif;">
+  <button id="chatbot-toggle" title="Chat with AI Support"
+    style="background-color: var(--primary); border-radius: 50%; border: none; width: 56px; height: 56px; color: white; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 20px rgba(53,112,255,0.6);">
+    <i class="fas fa-robot"></i>
+  </button>
+
+  <div id="chatbot-window" style="display: none; margin-top: 8px; background: var(--glass-bg); border-radius: 18px; box-shadow: var(--shadow); max-height: 400px; overflow-y: auto; padding: 12px; color: var(--text-primary);">
+    <div id="chatbot-messages" style="max-height: 320px; overflow-y: auto;"></div>
+    <form id="chatbot-form" style="margin-top: 8px; display: flex; gap: 8px;">
+      <input id="chatbot-input" type="text" placeholder="Ask me about books or site features..." style="flex: 1; border-radius: 12px; border: 1px solid var(--border); padding: 10px;" required />
+      <button type="submit" style="background-color: var(--primary); border:none; border-radius: 12px; padding: 10px 14px; color: white; font-weight: 700; cursor: pointer;">Send</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('chatbot-toggle').onclick = function() {
+  const win = document.getElementById('chatbot-window');
+  if (win.style.display === 'none') {
+    win.style.display = 'block';
+    document.getElementById('chatbot-input').focus();
+  } else {
+    win.style.display = 'none';
+  }
+};
+
+// Handle chat form submission
+document.getElementById('chatbot-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const inputEl = document.getElementById('chatbot-input');
+  const userMessage = inputEl.value.trim();
+  if (!userMessage) return;
+
+  // Show user message
+  appendMessage('You', userMessage, false);
+  inputEl.value = '';
+
+  // Send message to backend for AI response
+  appendMessage('AI', 'Typing...', true);
+  const aiResponseEl = document.querySelector('#chatbot-messages .typing');
+  try {
+    const response = await fetch('{% url "chatbot_api" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
+    const data = await response.json();
+    aiResponseEl.textContent = data.reply || "Sorry, I couldn't find an answer.";
+    aiResponseEl.classList.remove('typing');
+  } catch {
+    aiResponseEl.textContent = "Error contacting AI support.";
+    aiResponseEl.classList.remove('typing');
+  }
+};
+
+function appendMessage(sender, message, isTyping) {
+  const container = document.getElementById('chatbot-messages');
+  const msgDiv = document.createElement('div');
+  msgDiv.style.margin = '6px 0';
+  msgDiv.style.padding = '10px';
+  msgDiv.style.borderRadius = '12px';
+  msgDiv.style.backgroundColor = sender === 'You' ? 'var(--primary)' : 'var(--accent)';
+  msgDiv.style.color = sender === 'You' ? 'white' : '#1a1a1a';
+  msgDiv.textContent = sender + ': ' + message;
+  if (isTyping) msgDiv.classList.add('typing');
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+</script>
 
 <footer style="padding: 2rem 0; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; gap: 20px;">
   <form action="{% url 'subscription_plans' %}" method="get" style="display: inline;">

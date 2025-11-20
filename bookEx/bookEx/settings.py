@@ -134,3 +134,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+OPENROUTER_API_KEY = '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'
+OPENROUTER_MODEL = 'gpt-4o-mini'
