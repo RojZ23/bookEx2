@@ -869,7 +869,7 @@ def chatbot_api(request):
         # Fetch books info to create context for AI
         books = Book.objects.all().values('name', 'price')
 
-        books_info = "; ".join([f"{b['name']} priced at ${b['price']}" for b in books[:50]])  # limit length
+        books_info = "; ".join([f"{b['name']} priced at ${b['price']} /n" for b in books[:50]])  # limit length
 
         prompt = f"""
 You are a helpful assistant for a book exchange website. You know about the books available and site features like searching, posting, and user tiers.
