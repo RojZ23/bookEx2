@@ -577,9 +577,16 @@ def checkout(request):
         })
 
 
-@login_required
 def rate_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
+
+    # If user is not logged in, show login_required page
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to rate a book.',
+            'item_list': MainMenu.objects.all(),
+        })
+
     if request.method == 'POST':
         rating = int(request.POST.get('rating'))
         Rate.objects.update_or_create(
