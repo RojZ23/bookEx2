@@ -11,14 +11,20 @@
       --primary: #357CFF;
       --primary-dark: #256adf;
       --accent: #F6A801;
-      --text-primary: #23272F;
-      --text-secondary: #6e7b8b;
-      --text-tertiary: #a1adbd;
-      --bg-gradient: linear-gradient(120deg, #e3f0ff 0%, #d6eaff 54%, #fdfaef 100%);
-      --glass-bg: rgba(255,255,255,0.85);
-      --border: #c2dafc;
       --shadow: 0 4px 18px rgba(52,112,255, 0.15);
+
+      /* default: dark mode values */
+      --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
+      --glass-bg: rgba(50,60,90,0.80);
+      --text-primary: #e3e7ec;
+      --text-secondary: #bacbe8;
+      --text-tertiary: #899cc2;
+      --border: #39445a;
+
+      /* card background variable used on home page */
+      --bg-glass: rgba(50,60,90,0.80);
     }
+
 
     @media (prefers-color-scheme: dark) {
       :root {
@@ -201,6 +207,46 @@
       .user-actions a, .user-actions button {padding: 0.52rem 1rem;font-size: 0.95rem;}
       main {padding: 1rem 2vw;}
     }
+
+    :root {
+      --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
+      --glass-bg: rgba(50,60,90,0.80);
+      --text-primary: #e3e7ec;
+      --text-secondary: #bacbe8;
+      --text-tertiary: #899cc2;
+      --border: #39445a;
+    }
+
+        /* Light mode colors */
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background 0.6s;
+    }
+
+    /* Light mode colors */
+    body.light-mode {
+      --bg-gradient: linear-gradient(120deg, #e3f0ff 0%, #d6eaff 54%, #fdfaef 100%);
+      --glass-bg: rgba(255,255,255,0.85);
+      --bg-glass: rgba(255,255,255,0.85);  /* important */
+      --text-primary: #23272F;
+      --text-secondary: #6e7b8b;
+      --text-tertiary: #a1adbd;
+      --border: #c2dafc;
+    }
+
+    /* Ensure the body background always respects the variable */
+    body {
+      background: var(--bg-gradient) !important;
+    }
+
+
+
   </style>
 </head>
 <body>
@@ -344,5 +390,30 @@ function appendMessage(sender, message, isTyping) {
   </form>
   <span style="color: var(--text-secondary); user-select: none;">&copy; 2025 Book Exchange | All rights reserved</span>
 </footer>
+<button id="mode-toggle" aria-label="Toggle light/dark mode"
+  style="position: fixed; bottom: 20px; left: 20px; padding: 10px 16px; font-weight: 600; border-radius: 20px; border: none; cursor: pointer; background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(53,112,255,0.7); transition: background 0.3s;">
+  Light Mode
+</button>
+<script>
+  const modeToggleBtn = document.getElementById('mode-toggle');
+
+  // Apply saved mode from localStorage on page load
+  const savedMode = localStorage.getItem('color-mode');
+  if (savedMode === 'light') {
+    document.body.classList.add('light-mode');
+    modeToggleBtn.textContent = 'Dark Mode';
+  } else {
+    // default to dark mode
+    modeToggleBtn.textContent = 'Light Mode';
+  }
+
+  modeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    modeToggleBtn.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+    // Save mode in localStorage
+    localStorage.setItem('color-mode', isLight ? 'light' : 'dark');
+  });
+</script>
 </body>
 </html>
