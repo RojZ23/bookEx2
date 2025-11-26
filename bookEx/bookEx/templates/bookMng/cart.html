@@ -9,35 +9,297 @@
 {% endblock sidenav %}
 
 {% block content %}
-  <h2>Your Shopping Cart</h2>
+<style>
+  .cart-container {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 18px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: clamp(2rem, 3vw + 1rem, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .cart-table {
+    width: 100%;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    backdrop-filter: blur(24px);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .table-header {
+    background: rgba(15, 23, 42, 0.9);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .table-header-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .table-header-cell {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    text-align: left;
+  }
+
+  .table-body {
+    padding: 0 2rem;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    align-items: center;
+  }
+
+  .table-row:last-child {
+    border-bottom: none;
+  }
+
+  .book-link {
+    color: #60a5fa;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 1.1rem;
+  }
+
+  .book-link:hover {
+    color: #a855f7;
+    text-decoration: underline;
+  }
+
+  .table-cell {
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+
+  .price-cell {
+    color: #22c55e;
+    font-weight: 600;
+  }
+
+  .total-cell {
+    color: #f59e0b;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .empty-cart {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    backdrop-filter: blur(24px);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+  }
+
+  .empty-text {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.6);
+  }
+
+  .checkout-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .cart-table,
+  body.light-mode .empty-cart {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .table-header {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  @media (max-width: 768px) {
+    .cart-container {
+      padding: 2rem 1rem;
+    }
+
+    .table-header-row,
+    .table-row {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .table-header {
+      display: none;
+    }
+
+    .table-row {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .table-body {
+      padding: 0;
+    }
+
+    .table-cell::before {
+      content: attr(data-label);
+      font-weight: 700;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    body.light-mode .table-row {
+      background: rgba(255, 255, 255, 0.8);
+    }
+  }
+</style>
+
+<div class="cart-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Shopping Cart</span>
+  </div>
+
+  <h1 class="page-title">Your Shopping Cart</h1>
 
   {% if cart_items %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Book</th>
-          <th>Quantity</th>
-          <th>Price per Unit</th>
-          <th>Total Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in cart_items %}
-          <tr>
-            <td><a href="{% url 'book_detail' item.book.id %}">{{ item.book.name }}</a></td>
-            <td>{{ item.quantity }}</td>
-            <td>${{ item.book.price }}</td>
-            <td>${{ item.quantity|mul:item.book.price }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="cart-table">
+      <div class="table-header">
+        <div class="table-header-row">
+          <div class="table-header-cell">Book</div>
+          <div class="table-header-cell">Quantity</div>
+          <div class="table-header-cell">Price per Unit</div>
+          <div class="table-header-cell">Total Price</div>
+        </div>
+      </div>
 
-    <div class="d-flex justify-content-end">
-      <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+      <div class="table-body">
+        {% for item in cart_items %}
+          <div class="table-row">
+            <div class="table-cell" data-label="Book">
+              <a href="{% url 'book_detail' item.book.id %}" class="book-link">
+                {{ item.book.name }}
+              </a>
+            </div>
+            <div class="table-cell" data-label="Quantity">
+              {{ item.quantity }}
+            </div>
+            <div class="table-cell price-cell" data-label="Price per Unit">
+              ${{ item.book.price }}
+            </div>
+            <div class="table-cell total-cell" data-label="Total Price">
+              ${{ item.quantity|mul:item.book.price }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="checkout-section">
+      <a href="{% url 'checkout' %}" class="btn-primary">
+        <i class="fas fa-shopping-bag"></i>
+        Proceed to Checkout
+      </a>
     </div>
 
   {% else %}
-    <p>Your cart is empty.</p>
+    <div class="empty-cart">
+      <i class="fas fa-shopping-cart empty-icon"></i>
+      <p class="empty-text">Your cart is empty.</p>
+      <a href="{% url 'searchbooks' %}" class="btn-primary">
+        <i class="fas fa-book"></i>
+        Browse Books
+      </a>
+    </div>
   {% endif %}
+</div>
 {% endblock content %}

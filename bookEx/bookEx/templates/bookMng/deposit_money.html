@@ -1,73 +1,246 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section style="
-  max-width: 400px;
-  margin: 3rem auto;
-  padding: 2.5rem 2rem;
-  background: linear-gradient(135deg, rgba(53,124,255,0.1), rgba(246,168,1,0.15));
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(53,124,255,0.18), inset 0 0 8px rgba(246,168,1,0.12);
-  font-family: 'Inter', 'Roboto', Arial, sans-serif;
-  color: var(--text-primary);
-">
-  <h2 style="
+<style>
+  .deposit-container {
+    max-width: 420px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    backdrop-filter: blur(24px);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 18px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3vw + 1rem, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
     text-align: center;
-    color: var(--primary);
-    font-weight: 900;
-    font-size: 2rem;
     margin-bottom: 2rem;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 4px rgba(247,168,1,0.4);
-  ">
-    Deposit Money
-  </h2>
-  <form method="post" novalidate style="display: flex; flex-direction: column; gap: 1.5rem;">
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .deposit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label i {
+    color: #60a5fa;
+  }
+
+  .form-input {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+    border: 1.5px solid rgba(148, 163, 184, 0.5);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+  }
+
+  .form-input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 1rem 2rem;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+    margin-top: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.6);
+  }
+
+  .current-balance {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    text-align: center;
+  }
+
+  .balance-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .balance-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #22c55e;
+  }
+
+  .info-note {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    text-align: center;
+  }
+
+  .info-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .info-text i {
+    color: #f59e0b;
+    margin-right: 0.5rem;
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .deposit-container {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  body.light-mode .current-balance,
+  body.light-mode .info-note {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .form-input {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  @media (max-width: 768px) {
+    .deposit-container {
+      margin: 2rem 1rem;
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>
+
+<div class="deposit-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Wallet Deposit</span>
+  </div>
+
+  <h1 class="page-title">Deposit Money</h1>
+
+  <!-- Current Balance Display -->
+  <div class="current-balance">
+    <div class="balance-label">Current Balance</div>
+    <div class="balance-amount">
+      <i class="fas fa-wallet"></i>
+      ${{ user.userprofile.balance|default:"0.00" }}
+    </div>
+  </div>
+
+  <form method="post" novalidate class="deposit-form">
     {% csrf_token %}
-    <label for="amount" style="
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      color: var(--text-primary);
-    ">Amount to Deposit ($):</label>
-    <input
-      type="number"
-      step="0.01"
-      min="0.01"
-      name="amount"
-      id="amount"
-      required
-      placeholder="Enter amount"
-      style="
-        padding: 0.9rem 1.2rem;
-        font-size: 1rem;
-        border: 1.8px solid var(--primary);
-        border-radius: 12px;
-        outline-offset: 3px;
-        transition: border-color 0.3s ease;
-        background: transparent;
-        color: var(--text-primary);
-      "
-      onfocus="this.style.borderColor = 'var(--primary-dark)'"
-      onblur="this.style.borderColor = 'var(--primary)'"
-    />
-    <button type="submit" style="
-      background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
-      color: white;
-      font-weight: 700;
-      border: none;
-      padding: 0.95rem;
-      border-radius: 22px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(52,112,255,0.34);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    "
-    onmouseover="this.style.backgroundColor='var(--primary-dark)'; this.style.boxShadow='0 9px 22px rgba(37, 106, 223, 0.44)';"
-    onmouseout="this.style.backgroundColor=''; this.style.boxShadow='0 6px 18px rgba(52,112,255,0.34)';"
-    >
-      Deposit
+
+    <div class="form-group">
+      <label for="amount" class="form-label">
+        <i class="fas fa-money-bill-wave"></i>
+        Amount to Deposit ($)
+      </label>
+      <input
+        type="number"
+        step="0.01"
+        min="0.01"
+        name="amount"
+        id="amount"
+        required
+        placeholder="Enter amount"
+        class="form-input"
+      />
+    </div>
+
+    <button type="submit" class="btn-primary">
+      <i class="fas fa-credit-card"></i>
+      Deposit Funds
     </button>
   </form>
-</section>
+
+  <div class="info-note">
+    <p class="info-text">
+      <i class="fas fa-info-circle"></i>
+      Minimum deposit: $0.01. Funds will be available immediately in your wallet.
+    </p>
+  </div>
+</div>
 {% endblock %}

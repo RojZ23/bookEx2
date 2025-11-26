@@ -7,53 +7,142 @@
 {% endblock sidenav %}
 
 {% block content %}
-<section style="
-  max-width: 720px;
-  margin: 3rem auto;
-  padding: 2.5rem 2rem;
-  background: linear-gradient(135deg, rgba(53,124,255,0.10), rgba(246,168,1,0.15));
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(53,124,255,0.18), inset 0 0 8px rgba(246,168,1,0.12);
-  text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-primary);
-">
-  <h1 style="
-    font-weight: 900;
-    font-size: 3rem;
-    color: var(--primary);
-    margin-bottom: 2rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-shadow: 1px 1px 4px rgba(247, 168, 1, 0.4);
-  ">
-    About Us
-  </h1>
+<style>
+  .about-container {
+    max-width: 720px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    text-align: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    backdrop-filter: blur(24px);
+  }
 
-  <p style="
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 24px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .about-title {
+    font-weight: 700;
+    font-size: clamp(2.4rem, 3vw + 1rem, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .lead-text {
     font-size: 1.3rem;
     line-height: 1.75;
     max-width: 600px;
     margin: 0 auto 3rem auto;
     font-weight: 600;
     color: var(--text-primary);
-  ">
-    Welcome to our Book Exchange platform — a collaborative project developed by passionate students dedicated to facilitating book sharing, learning, and fostering community engagement.
-  </p>
+  }
 
-  <p style="
+  .description {
     font-size: 1.1rem;
     line-height: 1.6;
     max-width: 580px;
     margin: 0 auto;
     color: var(--text-secondary);
-  ">
-    Whether you’re looking to swap your favorite reads or explore new titles, our site offers a user-friendly experience built with education and connectivity in mind. Join us to be a part of a growing community of readers.
+  }
+
+  .logo-container {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    display: inline-block;
+  }
+
+  .university-logo {
+    max-width: 220px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.25);
+    filter: brightness(1.1);
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .about-container {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  body.light-mode .logo-container {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  @media (max-width: 768px) {
+    .about-container {
+      margin: 2rem 1rem;
+      padding: 2rem 1.5rem;
+    }
+
+    .lead-text {
+      font-size: 1.1rem;
+    }
+
+    .description {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<section class="about-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>About Our Platform</span>
+  </div>
+
+  <h1 class="about-title">About Us</h1>
+
+  <p class="lead-text">
+    Welcome to our Book Exchange platform — a collaborative project developed by passionate students dedicated to facilitating book sharing, learning, and fostering community engagement.
   </p>
 
-  <div style="margin-top: 3rem;">
-    <img src="https://www.calstatela.edu/sites/default/files/badge.png" alt="Cal State LA Logo"
-         style="max-width: 220px; height: auto; border-radius: 14px; box-shadow: 0 12px 28px rgba(53,124,255,0.25);">
+  <p class="description">
+    Whether you're looking to swap your favorite reads or explore new titles, our site offers a user-friendly experience built with education and connectivity in mind. Join us to be a part of a growing community of readers.
+  </p>
+
+  <div class="logo-container">
+    <img src="https://www.calstatela.edu/sites/default/files/badge.png" alt="Cal State LA Logo" class="university-logo">
   </div>
 </section>
 {% endblock content %}

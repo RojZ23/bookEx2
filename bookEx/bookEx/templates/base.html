@@ -8,32 +8,39 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     :root {
-      --primary: #357CFF;
-      --primary-dark: #256adf;
-      --accent: #F6A801;
-      --shadow: 0 4px 18px rgba(52,112,255, 0.15);
+      --space-xs: 6px;
+      --space-sm: 10px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --radius-full: 999px;
 
-      /* default: dark mode values */
-      --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
-      --glass-bg: rgba(50,60,90,0.80);
-      --text-primary: #e3e7ec;
-      --text-secondary: #bacbe8;
-      --text-tertiary: #899cc2;
-      --border: #39445a;
+      /* Updated color scheme to match home.jte */
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --accent: #22c55e;
+      --shadow: 0 4px 18px rgba(79, 70, 229, 0.15);
 
-      /* card background variable used on home page */
-      --bg-glass: rgba(50,60,90,0.80);
+      /* Dark mode values matching home.jte */
+      --bg-gradient: radial-gradient(circle at top, #1d4ed8 0, transparent 55%),
+                    radial-gradient(circle at bottom, #0f766e 0, transparent 55%),
+                    #020617;
+      --glass-bg: rgba(15, 23, 42, 0.96);
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+      --text-tertiary: #6b7280;
+      --border: rgba(148, 163, 184, 0.35);
     }
-
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
-        --glass-bg: rgba(50,60,90,0.80);
-        --text-primary: #e3e7ec;
-        --text-secondary: #bacbe8;
-        --text-tertiary: #899cc2;
-        --border: #39445a;
+        --bg-gradient: radial-gradient(circle at top, #1d4ed8 0, transparent 55%),
+                      radial-gradient(circle at bottom, #0f766e 0, transparent 55%),
+                      #020617;
+        --glass-bg: rgba(15, 23, 42, 0.96);
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --text-tertiary: #6b7280;
+        --border: rgba(148, 163, 184, 0.35);
       }
     }
 
@@ -41,7 +48,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', 'Roboto', Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
@@ -59,7 +66,7 @@
       padding: 1.2rem 2.2rem;
       border-bottom: 1.5px solid var(--border);
       background: var(--glass-bg);
-      box-shadow: 0 2px 24px rgba(52,112,255,0.09);
+      box-shadow: 0 2px 24px rgba(79, 70, 229, 0.09);
       border-radius: 0 0 18px 18px;
       display: flex;
       justify-content: space-between;
@@ -76,10 +83,10 @@
       align-items: center;
       gap: 12px;
       font-size: 2rem;
-      color: var(--primary);
+      color: var(--text-primary);
       font-weight: 900;
       letter-spacing: 0.03em;
-      text-shadow: 0 2px 9px rgba(52,112,255,0.08);
+      text-shadow: 0 2px 9px rgba(79, 70, 229, 0.08);
     }
 
     .logo i {
@@ -109,7 +116,7 @@
     nav ul li a:hover,
     nav ul li a.active {
       color: var(--primary);
-      background: rgba(52,112,255,0.07);
+      background: rgba(79, 70, 229, 0.07);
     }
 
     nav ul li a.active::after {
@@ -120,7 +127,7 @@
       height: 3px;
       background: linear-gradient(90deg, var(--primary) 57%, var(--accent) 100%);
       border-radius: 10px;
-      box-shadow: 0 2px 7px rgba(52,112,255,0.13);
+      box-shadow: 0 2px 7px rgba(79, 70, 229, 0.13);
     }
 
     .user-actions {
@@ -139,23 +146,23 @@
 
     .user-actions a,
     .user-actions button {
-      background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
+      background: radial-gradient(circle at top left, var(--primary), #2563eb);
       color: white;
       border: none;
       padding: 0.7rem 2rem;
-      border-radius: 22px;
+      border-radius: var(--radius-full);
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
       text-decoration: none;
-      box-shadow: 0 6px 14px rgba(52,112,255, .14);
+      box-shadow: 0 6px 14px rgba(79, 70, 229, .14);
       transition: background 0.20s, box-shadow 0.17s;
     }
 
     .user-actions a:hover,
     .user-actions button:hover {
       background: var(--primary-dark);
-      box-shadow: 0 11px 22px rgba(52,112,255, .14);
+      box-shadow: 0 11px 22px rgba(79, 70, 229, .14);
       transform: scale(1.035);
     }
 
@@ -176,7 +183,7 @@
       font-size: 1rem;
       border-top: 1.5px solid var(--border);
       border-radius: 16px 16px 0 0;
-      box-shadow: 0 -2px 28px rgba(52,112,255,0.08);
+      box-shadow: 0 -2px 28px rgba(79, 70, 229, 0.08);
       margin-top: auto;
       backdrop-filter: blur(8px);
       letter-spacing: 0.01em;
@@ -208,36 +215,14 @@
       main {padding: 1rem 2vw;}
     }
 
-    :root {
-      --bg-gradient: linear-gradient(110deg, #243752 0%, #1a2239 90%);
-      --glass-bg: rgba(50,60,90,0.80);
-      --text-primary: #e3e7ec;
-      --text-secondary: #bacbe8;
-      --text-tertiary: #899cc2;
-      --border: #39445a;
-    }
-
-        /* Light mode colors */
-    body {
-      min-height: 100vh;
-      background: var(--bg-gradient);
-      color: var(--text-primary);
-      line-height: 1.5;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      transition: background 0.6s;
-    }
-
     /* Light mode colors */
     body.light-mode {
-      --bg-gradient: linear-gradient(120deg, #e3f0ff 0%, #d6eaff 54%, #fdfaef 100%);
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       --glass-bg: rgba(255,255,255,0.85);
-      --bg-glass: rgba(255,255,255,0.85);  /* important */
-      --text-primary: #23272F;
-      --text-secondary: #6e7b8b;
-      --text-tertiary: #a1adbd;
-      --border: #c2dafc;
+      --text-primary: #2c3e50;
+      --text-secondary: #4a5568;
+      --text-tertiary: #718096;
+      --border: rgba(226, 232, 240, 0.8);
     }
 
     /* Ensure the body background always respects the variable */
@@ -245,8 +230,122 @@
       background: var(--bg-gradient) !important;
     }
 
+    /* Chatbot styles updated to match new theme */
+    #chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1500;
+      max-width: 350px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
+    #chatbot-toggle {
+      background: radial-gradient(circle at top left, var(--primary), #2563eb);
+      border-radius: 50%;
+      border: none;
+      width: 56px;
+      height: 56px;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(79, 70, 229, 0.7);
+      transition: all 0.3s ease;
+    }
 
+    #chatbot-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(79, 70, 229, 0.9);
+    }
+
+    #chatbot-window {
+      display: none;
+      margin-top: 8px;
+      background: var(--glass-bg);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border);
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 12px;
+      color: var(--text-primary);
+      backdrop-filter: blur(24px);
+    }
+
+    #chatbot-messages {
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    #chatbot-form {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+
+    #chatbot-input {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      background: var(--glass-bg);
+      color: var(--text-primary);
+    }
+
+    #chatbot-form button {
+      background: radial-gradient(circle at top left, var(--primary), #2563eb);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #chatbot-form button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Mode toggle button */
+    #mode-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      padding: 10px 16px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      border: none;
+      cursor: pointer;
+      background: radial-gradient(circle at top left, var(--primary), #2563eb);
+      color: white;
+      box-shadow: 0 12px 30px rgba(79, 70, 229, 0.7);
+      transition: all 0.3s ease;
+    }
+
+    #mode-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(79, 70, 229, 0.9);
+    }
+
+    /* Footer button */
+    footer button {
+      padding: 14px 32px;
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle at top left, var(--primary), #2563eb);
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(79, 70, 229, 0.7);
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    footer button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(79, 70, 229, 0.9);
+    }
   </style>
 </head>
 <body>
@@ -285,40 +384,40 @@
       {% endif %}
     </ul>
   </nav>
-    <div class="user-actions">
-      {% if user.is_authenticated %}
-        <span>Hello, {{ user.username }}</span>
-        <form action="{% url 'logout' %}" method="post" style="display: inline;">
-          {% csrf_token %}
-          <button type="submit" style="background: linear-gradient(95deg, var(--primary) 80%, var(--accent) 100%);
-            color: white; border: none; padding: 0.7rem 2rem; border-radius: 22px; font-size: 1rem; font-weight: 700;
-            cursor: pointer; text-decoration: none; box-shadow: 0 6px 14px rgba(52,112,255, .14);
-            transition: background 0.20s, box-shadow 0.17s;">
-            Logout
-          </button>
-        </form>
-      {% else %}
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Register</a>
-      {% endif %}
-    </div>
+  <div class="user-actions">
+    {% if user.is_authenticated %}
+      <span>Hello, {{ user.username }}</span>
+      <form action="{% url 'logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" style="background: radial-gradient(circle at top left, var(--primary), #2563eb);
+          color: white; border: none; padding: 0.7rem 2rem; border-radius: var(--radius-full); font-size: 1rem; font-weight: 700;
+          cursor: pointer; text-decoration: none; box-shadow: 0 6px 14px rgba(79, 70, 229, .14);
+          transition: background 0.20s, box-shadow 0.17s;">
+          Logout
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'register' %}">Register</a>
+    {% endif %}
+  </div>
 </header>
 
 <main>
   {% block content %}{% endblock %}
 </main>
+
 <!-- Chatbot icon (click to toggle chat window) -->
-<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1500; max-width: 350px; font-family: 'Inter', sans-serif;">
-  <button id="chatbot-toggle" title="Chat with AI Support"
-    style="background-color: var(--primary); border-radius: 50%; border: none; width: 56px; height: 56px; color: white; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 20px rgba(53,112,255,0.6);">
+<div id="chatbot-container">
+  <button id="chatbot-toggle" title="Chat with AI Support">
     <i class="fas fa-robot"></i>
   </button>
 
-  <div id="chatbot-window" style="display: none; margin-top: 8px; background: var(--glass-bg); border-radius: 18px; box-shadow: var(--shadow); max-height: 400px; overflow-y: auto; padding: 12px; color: var(--text-primary);">
-    <div id="chatbot-messages" style="max-height: 320px; overflow-y: auto;"></div>
-    <form id="chatbot-form" style="margin-top: 8px; display: flex; gap: 8px;">
-      <input id="chatbot-input" type="text" placeholder="Ask me about books or site features..." style="flex: 1; border-radius: 12px; border: 1px solid var(--border); padding: 10px;" required />
-      <button type="submit" style="background-color: var(--primary); border:none; border-radius: 12px; padding: 10px 14px; color: white; font-weight: 700; cursor: pointer;">Send</button>
+  <div id="chatbot-window">
+    <div id="chatbot-messages"></div>
+    <form id="chatbot-form">
+      <input id="chatbot-input" type="text" placeholder="Ask me about books or site features..." required />
+      <button type="submit">Send</button>
     </form>
   </div>
 </div>
@@ -381,19 +480,19 @@ function appendMessage(sender, message, isTyping) {
 }
 </script>
 
-<footer style="padding: 2rem 0; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; gap: 20px;">
+<footer style="padding: 2rem 0; display: flex; justify-content: center; align-items: center; gap: 20px;">
   <form action="{% url 'subscription_plans' %}" method="get" style="display: inline;">
-    <button type="submit"
-      style="padding: 14px 32px; border-radius: 10px; background: var(--primary); color: #fff; font-size: 1.15rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 123, 255, 0.18); border: none; transition: background 0.25s;">
+    <button type="submit">
       Subscription Plans
     </button>
   </form>
   <span style="color: var(--text-secondary); user-select: none;">&copy; 2025 Book Exchange | All rights reserved</span>
 </footer>
-<button id="mode-toggle" aria-label="Toggle light/dark mode"
-  style="position: fixed; bottom: 20px; left: 20px; padding: 10px 16px; font-weight: 600; border-radius: 20px; border: none; cursor: pointer; background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(53,112,255,0.7); transition: background 0.3s;">
+
+<button id="mode-toggle" aria-label="Toggle light/dark mode">
   Light Mode
 </button>
+
 <script>
   const modeToggleBtn = document.getElementById('mode-toggle');
 

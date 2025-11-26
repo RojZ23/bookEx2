@@ -587,9 +587,12 @@ def rate_book(request, book_id):
             book=book,
             defaults={'rating': rating}
         )
+        if book.is_exclusive:
+            return redirect('exclusive_book_detail', book_id=book_id)
         return redirect('book_detail', book_id=book_id)
 
-    return render(request, 'bookMng/rate.html', { 'book': book })
+    return render(request, 'bookMng/rate.html', {'book': book})
+
 
 @login_required
 def toggle_favorite(request, book_id):
@@ -599,6 +602,9 @@ def toggle_favorite(request, book_id):
         book.favorites.remove(user)
     else:
         book.favorites.add(user)
+
+    if book.is_exclusive:
+        return redirect('exclusive_book_detail', book_id=book_id)
     return redirect('book_detail', book_id=book_id)
 
 @login_required
@@ -619,15 +625,23 @@ def add_comment(request, book_id):
         content = request.POST.get('content')
         if content:
             Comment.objects.create(book=book, user=request.user, content=content)
+
+    if book.is_exclusive:
+        return redirect('exclusive_book_detail', book_id=book_id)
     return redirect('book_detail', book_id=book_id)
+
 
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.user != request.user:
         return HttpResponseForbidden("You are not allowed to delete this comment.")
-    book_id = comment.book.id
+    book = comment.book
+    book_id = book.id
     comment.delete()
+
+    if book.is_exclusive:
+        return redirect('exclusive_book_detail', book_id=book_id)
     return redirect('book_detail', book_id=book_id)
 
 @login_required
@@ -741,8 +755,17 @@ def cancel_checkout(request):
 def delete_rating(request, rate_id):
     rating = get_object_or_404(Rate, id=rate_id)
     if rating.user == request.user:
+        book = rating.book
+        book_id = book.id
         rating.delete()
-    return redirect('book_detail', book_id=rating.book.id)
+        if book.is_exclusive:
+            return redirect('exclusive_book_detail', book_id=book_id)
+        return redirect('book_detail', book_id=book_id)
+    # If not owner, just send back to the right detail page
+    book = rating.book
+    if book.is_exclusive:
+        return redirect('exclusive_book_detail', book_id=book.id)
+    return redirect('book_detail', book_id=book.id)
 
 @login_required
 def edit_comment(request, comment_id):

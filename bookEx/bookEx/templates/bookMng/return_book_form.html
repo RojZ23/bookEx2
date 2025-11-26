@@ -1,13 +1,222 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width:500px;margin:2rem auto;background:var(--bg-secondary);padding:2rem;border-radius:8px;">
-    <h2>Return "{{ book.name }}"</h2>
-    <form method="post">
-        {% csrf_token %}
-        <label for="quantity">How many copies do you want to return? (Available: {{ available_to_return }})</label>
-        <input type="number" name="quantity" min="1" max="{{ available_to_return }}" required>
-        <button type="submit" style="margin-top:1rem;background:var(--primary);color:white;padding:8px 26px;border-radius:8px;border:none;">Return</button>
-        <a href="{% url 'mybooks' %}" style="margin-left:10px;">Cancel</a>
-    </form>
+<div class="return-container">
+    <div class="return-panel">
+        <div class="panel-header">
+            <div class="badge">
+                <div class="badge-dot"></div>
+                <span>Return Book</span>
+            </div>
+            <h2>Return "{{ book.name }}"</h2>
+            <p class="subtitle">
+                Please specify how many copies you'd like to return. You can return up to <strong>{{ available_to_return }}</strong> copies.
+            </p>
+        </div>
+
+        <form method="post" class="return-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="quantity">Number of Copies to Return</label>
+                <input type="number"
+                       name="quantity"
+                       id="quantity"
+                       min="1"
+                       max="{{ available_to_return }}"
+                       required
+                       placeholder="Enter number of copies">
+                <div class="input-hint">Available to return: {{ available_to_return }} copies</div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-undo-alt"></i>
+                    Return Books
+                </button>
+                <a href="{% url 'mybooks' %}" class="btn-outline">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<style>
+.return-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: var(--space-lg);
+}
+
+.return-panel {
+    position: relative;
+    border-radius: 20px;
+    padding: 30px;
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+        rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+    width: 100%;
+    max-width: 480px;
+}
+
+.panel-header {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.panel-header h2 {
+    margin: 18px 0 12px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    max-width: 100%;
+}
+
+.subtitle strong {
+    color: #e5e7eb;
+    font-weight: 500;
+}
+
+.return-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-group input {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.input-hint {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-primary,
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        transform 0.07s ease-out,
+        box-shadow 0.1s ease-out,
+        background 0.1s ease-out,
+        color 0.1s ease-out;
+    border: none;
+}
+
+.btn-primary {
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    box-shadow:
+        0 12px 30px rgba(37, 99, 235, 0.7),
+        0 0 0 1px rgba(129, 140, 248, 0.7);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 18px 40px rgba(37, 99, 235, 0.9),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.btn-outline {
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    color: #e5e7eb;
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.btn-outline:hover {
+    background: rgba(15, 23, 42, 0.95);
+    transform: translateY(-1px);
+    color: #e5e7eb;
+    text-decoration: none;
+}
+
+@media (max-width: 480px) {
+    .return-panel {
+        padding: 24px 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-outline {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

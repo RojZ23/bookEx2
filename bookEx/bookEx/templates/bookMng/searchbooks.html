@@ -2,161 +2,462 @@
 {% load static %}
 
 {% block content %}
-<section style="max-width: 700px; margin: 2rem auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<section class="search-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Book Search</span>
+  </div>
 
-  <h1 style="color: var(--primary); margin-bottom: 2rem; font-weight: 800; font-size: 2.8rem; text-align: center; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0,0,0,0.1);">
-    Search Books
-  </h1>
+  <h1>Find Your Next <span>Favorite Book</span></h1>
 
-  <form method="get" style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 2rem;">
-    <input
-      type="text"
-      name="q"
-      placeholder="Enter book name"
-      value="{{ query }}"
-      style="flex: 2 1 250px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; transition: box-shadow 0.3s; outline: none;"
-      onfocus="this.style.boxShadow='0 0 8px var(--primary)';"
-      onblur="this.style.boxShadow='none';"
-    />
-    <select name="min_rating" style="flex: 1 1 120px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem;">
-      <option value="none" {% if min_rating == 'none' %}selected{% endif %}>Any rating</option>
-      {% for i in "12345" %}
-        <option value="{{ i }}" {% if min_rating == i %}selected{% endif %}>{{ i }} star{% if i != '1' %}s{% endif %}+</option>
-      {% endfor %}
-    </select>
-    <input
-      type="number"
-      name="price_min"
-      min="0"
-      step="0.01"
-      placeholder="Min price"
-      value="{{ price_min }}"
-      style="flex: 1 1 80px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem;"
-    />
-    <input
-      type="number"
-      name="price_max"
-      min="0"
-      step="0.01"
-      placeholder="Max price"
-      value="{{ price_max }}"
-      style="flex: 1 1 80px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem;"
-    />
-    <button type="submit" class="btn btn-primary" style="
-      flex: 1 1 100px;
-      border-radius: 10px;
-      padding: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      background-color: var(--primary);
-      border: none;
-      color: #fff;
-      box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    " onmouseover="this.style.backgroundColor='var(--primary-dark)'; this.style.boxShadow='0 8px 20px rgba(0, 100, 210, 0.7)';"
-    onmouseout="this.style.backgroundColor='var(--primary)'; this.style.boxShadow='0 6px 16px rgba(0, 123, 255, 0.5)';">
-      Search
-    </button>
+  <p class="subtitle">
+    Search by title, filter by rating and price to find exactly what you're looking for.
+  </p>
+
+  <form method="get" class="search-form">
+    <div class="form-row">
+      <input
+        type="text"
+        name="q"
+        placeholder="Enter book name"
+        value="{{ query }}"
+        class="search-input"
+      />
+      <select name="min_rating" class="filter-select">
+        <option value="none" {% if min_rating == 'none' %}selected{% endif %}>Any rating</option>
+        {% for i in "12345" %}
+          <option value="{{ i }}" {% if min_rating == i %}selected{% endif %}>{{ i }} star{% if i != '1' %}s{% endif %}+</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <input
+        type="number"
+        name="price_min"
+        min="0"
+        step="0.01"
+        placeholder="Min price"
+        value="{{ price_min }}"
+        class="price-input"
+      />
+      <input
+        type="number"
+        name="price_max"
+        min="0"
+        step="0.01"
+        placeholder="Max price"
+        value="{{ price_max }}"
+        class="price-input"
+      />
+      <button type="submit" class="btn-primary">
+        Search
+      </button>
+    </div>
   </form>
 
   {% if books %}
-    <ul style="list-style: none; padding-left: 0;">
-      {% for book in books %}
-        <li style="display: flex; gap: 16px; padding: 16px 0; align-items: center; border-bottom: 1px solid var(--border);">
-          <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" style="width: 90px; height: 135px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-          <div style="flex-grow: 1;">
-            <a href="{% url 'book_detail' book.id %}" style="font-weight: 700; font-size: 1.3rem; color: var(--primary); text-decoration: none; transition: color 0.3s;">
-              {{ book.name }}
-              {% if book.is_exclusive %}
-                <span style="background-color: var(--primary); color: white; font-size: 0.8rem; padding: 2px 6px; margin-left: 10px; border-radius: 4px; vertical-align: middle;">
-                  Exclusive
-                </span>
-              {% endif %}
-            </a>
-            <p style="margin: 6px 0 4px 0; font-weight: 600; color: var(--text-secondary); font-size: 1.05rem;">${{ book.price }}</p>
+    <div class="results-panel">
+      <div class="panel-title">
+        <span>Search Results</span>
+        <span class="pill">{{ books|length }} book{{ books|length|pluralize }}</span>
+      </div>
 
-            {% if book.avg_rating_value %}
-              {% with rating_string=book.avg_rating_value|stringformat:"s" %}
-                {% with rating_main=rating_string|slice:":1" %}
-                  <div style="font-size: 1.4rem; color: #FFD700; line-height: 1; user-select:none;">
-                    {% for star_num in "12345" %}
-                      {% if star_num <= rating_main %}
-                        ★
-                      {% else %}
-                        <span style="color: #ccc;">★</span>
-                      {% endif %}
-                    {% endfor %}
-                    <span style="font-size: 0.9rem; color: var(--text-secondary); margin-left: 10px;">
-                      ({{ book.avg_rating_value|floatformat:1 }}/5)
-                    </span>
-                  </div>
-                {% endwith %}
-              {% endwith %}
-            {% else %}
-              <div style="color: var(--text-secondary); font-style: italic; font-size: 1rem;">No rating</div>
-            {% endif %}
-
-            <p style="margin-top: 8px; color: var(--text-primary); font-size: 1rem;">
-              {{ book.comments.all|length }} Comment{{ book.comments.all|length|pluralize }}
-            </p>
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
-
-{% if recommended_books %}
-<section style="max-width: 700px; margin: 2rem auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <h2 style="color: var(--primary); margin-bottom: 1rem; font-weight: 700; font-size: 1.8rem; text-align: center;">
-    Recommended Books
-  </h2>
-
-  <ul style="list-style: none; padding-left: 0;">
-    {% for book in recommended_books %}
-      <li style="display: flex; gap: 16px; padding: 16px 0; align-items: center; border-bottom: 1px solid var(--border);">
-        <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" style="width: 90px; height: 135px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <div style="flex-grow: 1;">
-          <a href="{% url 'book_detail' book.id %}" style="font-weight: 700; font-size: 1.2rem; color: var(--primary); text-decoration: none;">
-            {{ book.name }}
-            {% if book.is_exclusive %}
-              <span style="background-color: var(--primary); color: white; font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; border-radius: 4px; vertical-align: middle;">
-                Exclusive
-              </span>
-            {% endif %}
-          </a>
-          <p style="margin: 6px 0 4px 0; font-weight: 600; color: var(--text-secondary); font-size: 1rem;">${{ book.price }}</p>
-
-          {% if book.avg_rating %}
-            <div style="font-size: 1.2rem; color: #FFD700; line-height: 1; user-select:none;">
-              {% for star_num in "12345" %}
-                {% if star_num <= book.avg_rating|stringformat:"d" %}
-                  ★
-                {% else %}
-                  <span style="color: #ccc;">★</span>
+      <div class="books-list">
+        {% for book in books %}
+          <div class="book-item">
+            <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" class="book-cover">
+            <div class="book-details">
+              <div class="book-header">
+                <a href="{% url 'book_detail' book.id %}" class="book-title">
+                  {{ book.name }}
+                </a>
+                {% if book.is_exclusive %}
+                  <span class="exclusive-badge">Exclusive</span>
                 {% endif %}
-              {% endfor %}
-              <span style="font-size: 0.85rem; color: var(--text-secondary); margin-left: 10px;">
-                ({{ book.avg_rating|floatformat:1 }}/5)
-              </span>
+              </div>
+              <p class="book-price">${{ book.price }}</p>
+
+              {% if book.avg_rating_value %}
+                {% with rating_string=book.avg_rating_value|stringformat:"s" %}
+                  {% with rating_main=rating_string|slice:":1" %}
+                    <div class="book-rating">
+                      {% for star_num in "12345" %}
+                        {% if star_num <= rating_main %}
+                          ★
+                        {% else %}
+                          <span class="star-empty">★</span>
+                        {% endif %}
+                      {% endfor %}
+                      <span class="rating-value">
+                        ({{ book.avg_rating_value|floatformat:1 }}/5)
+                      </span>
+                    </div>
+                  {% endwith %}
+                {% endwith %}
+              {% else %}
+                <div class="no-rating">No rating</div>
+              {% endif %}
+
+              <p class="book-comments">
+                {{ book.comments.all|length }} Comment{{ book.comments.all|length|pluralize }}
+              </p>
             </div>
-          {% else %}
-            <div style="color: var(--text-secondary); font-style: italic;">No rating</div>
-          {% endif %}
-
-          <p style="margin-top: 8px; color: var(--text-primary); font-size: 0.9rem;">
-            {{ book.comments.all|length }} Comment{{ book.comments.all|length|pluralize }}
-          </p>
-        </div>
-      </li>
-    {% endfor %}
-  </ul>
-</section>
-{% endif %}
-
-
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   {% else %}
-    <p style="color: var(--text-secondary); font-style: italic; font-size: 1.1rem; text-align: center;">No books found matching your criteria.</p>
+    <div class="no-results-panel">
+      <div class="panel-title">
+        <span>No Books Found</span>
+      </div>
+      <p class="no-results-message">
+        No books found matching your criteria. Try adjusting your search filters.
+      </p>
+    </div>
+  {% endif %}
+
+  {% if recommended_books %}
+    <div class="recommendations-panel">
+      <div class="panel-title">
+        <span>Recommended Books</span>
+        <span class="pill">For You</span>
+      </div>
+
+      <div class="books-list">
+        {% for book in recommended_books %}
+          <div class="book-item">
+            <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" class="book-cover">
+            <div class="book-details">
+              <div class="book-header">
+                <a href="{% url 'book_detail' book.id %}" class="book-title">
+                  {{ book.name }}
+                </a>
+                {% if book.is_exclusive %}
+                  <span class="exclusive-badge">Exclusive</span>
+                {% endif %}
+              </div>
+              <p class="book-price">${{ book.price }}</p>
+
+              {% if book.avg_rating %}
+                <div class="book-rating">
+                  {% for star_num in "12345" %}
+                    {% if star_num <= book.avg_rating|stringformat:"d" %}
+                      ★
+                    {% else %}
+                      <span class="star-empty">★</span>
+                    {% endif %}
+                  {% endfor %}
+                  <span class="rating-value">
+                    ({{ book.avg_rating|floatformat:1 }}/5)
+                  </span>
+                </div>
+              {% else %}
+                <div class="no-rating">No rating</div>
+              {% endif %}
+
+              <p class="book-comments">
+                {{ book.comments.all|length }} Comment{{ book.comments.all|length|pluralize }}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   {% endif %}
 </section>
 
+<style>
+  .search-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    width: fit-content;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 3vw + 1rem, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  h1 span {
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    max-width: 430px;
+  }
+
+  .search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-input, .filter-select, .price-input {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.7);
+    color: #e5e7eb;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .search-input:focus, .filter-select:focus, .price-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+  }
+
+  .search-input {
+    flex: 2;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    border: none;
+    box-shadow:
+      0 12px 30px rgba(37, 99, 235, 0.7),
+      0 0 0 1px rgba(129, 140, 248, 0.7);
+    transition:
+      transform 0.07s ease-out,
+      box-shadow 0.1s ease-out,
+      background 0.1s ease-out,
+      color 0.1s ease-out;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 18px 40px rgba(37, 99, 235, 0.9),
+      0 0 0 1px rgba(191, 219, 254, 0.9);
+  }
+
+  .results-panel, .recommendations-panel, .no-results-panel {
+    position: relative;
+    border-radius: 20px;
+    padding: 20px 18px;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+      rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .panel-title {
+    font-size: 16px;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pill {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(129, 140, 248, 0.7);
+    color: #c7d2fe;
+    background: rgba(15, 23, 42, 0.8);
+    white-space: nowrap;
+  }
+
+  .books-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .book-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .book-item:last-child {
+    border-bottom: none;
+  }
+
+  .book-cover {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .book-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .book-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .book-title {
+    font-weight: 600;
+    font-size: 18px;
+    color: #e5e7eb;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .book-title:hover {
+    color: #a5b4fc;
+  }
+
+  .exclusive-badge {
+    background-color: #4f46e5;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .book-price {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .book-rating {
+    font-size: 16px;
+    color: #FFD700;
+    line-height: 1;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .star-empty {
+    color: #6b7280;
+  }
+
+  .rating-value {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 6px;
+  }
+
+  .no-rating {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .book-comments {
+    margin-top: 4px;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  .no-results-message {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 14px;
+    margin: 0;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  @media (max-width: 768px) {
+    .search-container {
+      padding: 10px;
+    }
+
+    .form-row {
+      flex-direction: column;
+    }
+
+    .search-input, .filter-select, .price-input, .btn-primary {
+      width: 100%;
+      flex: none;
+    }
+
+    .book-item {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .book-header {
+      justify-content: center;
+    }
+  }
+</style>
 {% endblock %}

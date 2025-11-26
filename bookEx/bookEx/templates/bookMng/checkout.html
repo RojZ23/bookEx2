@@ -3,90 +3,475 @@
 {% load custom_filters %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 2rem auto; background: var(--bg-secondary); border-radius: 12px; padding: 2rem 2.5rem; box-shadow: var(--shadow);">
-  <h2 style="font-weight: 700; color: var(--primary); margin-bottom: 2rem;">Checkout</h2>
+<style>
+  .checkout-container {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 18px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: clamp(2rem, 3vw + 1rem, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .checkout-content {
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    backdrop-filter: blur(24px);
+    padding: 2rem;
+  }
+
+  .checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-header {
+    background: rgba(15, 23, 42, 0.9);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .table-header-row {
+    display: grid;
+    grid-template-columns: 80px 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    align-items: center;
+  }
+
+  .table-header-cell {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .table-header-cell:first-child {
+    text-align: left;
+  }
+
+  .table-body {
+    padding: 0 1rem;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 80px 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    align-items: center;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .table-row:last-child {
+    border-bottom: none;
+  }
+
+  .book-image {
+    width: 60px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .book-link {
+    color: #60a5fa;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 1.1rem;
+    text-align: left;
+  }
+
+  .book-link:hover {
+    color: #a855f7;
+    text-decoration: underline;
+  }
+
+  .rating-stars {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .rating-value {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .quantity-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .quantity-input {
+    width: 60px;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .quantity-input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+  }
+
+  .btn-update {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-update:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+
+  .price-cell {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .total-cell {
+    color: #f59e0b;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(148, 163, 184, 0.3);
+    margin: 2rem 0;
+  }
+
+  .total-section {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .total-label {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .total-amount {
+    font-size: 1.5rem;
+    color: #22c55e;
+    font-weight: 700;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .btn-primary {
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.6);
+  }
+
+  .btn-secondary {
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(15, 23, 42, 0.95);
+    transform: translateY(-2px);
+  }
+
+  .empty-cart {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    max-width: 200px;
+    margin-bottom: 2rem;
+    opacity: 0.7;
+    border-radius: 12px;
+  }
+
+  .empty-text {
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .checkout-content {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .table-header {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  body.light-mode .quantity-input {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .btn-secondary {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  @media (max-width: 768px) {
+    .checkout-container {
+      padding: 2rem 1rem;
+    }
+
+    .checkout-content {
+      padding: 1.5rem;
+    }
+
+    .table-header-row,
+    .table-row {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .table-header {
+      display: none;
+    }
+
+    .table-row {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1.5rem;
+    }
+
+    .table-body {
+      padding: 0;
+    }
+
+    .book-image {
+      justify-self: center;
+    }
+
+    .table-cell::before {
+      content: attr(data-label);
+      font-weight: 700;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+    }
+
+    body.light-mode .table-row {
+      background: rgba(255, 255, 255, 0.8);
+    }
+  }
+</style>
+
+<div class="checkout-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Checkout</span>
+  </div>
+
+  <h1 class="page-title">Checkout</h1>
 
   {% if cart_items %}
-    <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 1rem;">
-      <thead>
-        <tr style="background: var(--primary); color: white; height: 40px;">
-          <th style="padding: 0 10px;">Image</th>
-          <th style="padding: 0 10px; text-align: left;">Title</th>
-          <th style="padding: 0 10px;">Rating</th>
-          <th style="padding: 0 10px;">Quantity</th>
-          <th style="padding: 0 10px;">Unit Price</th>
-          <th style="padding: 0 10px;">Total</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="checkout-content">
+      <div class="table-header">
+        <div class="table-header-row">
+          <div class="table-header-cell">Image</div>
+          <div class="table-header-cell">Title</div>
+          <div class="table-header-cell">Rating</div>
+          <div class="table-header-cell">Quantity</div>
+          <div class="table-header-cell">Unit Price</div>
+          <div class="table-header-cell">Total</div>
+        </div>
+      </div>
+
+      <div class="table-body">
         {% for item in cart_items %}
-        <tr style="background: var(--bg-primary); height: 110px;">
-          <td style="padding: 8px;">
-            <img src="{{ item.book.picture.url }}" alt="{{ item.book.name }}" style="width: 70px; height: 100px; object-fit: cover; border-radius: 6px;">
-          </td>
-          <td style="font-weight: 600; text-align: left; padding-left: 15px;">
-            <a href="{% url 'book_detail' item.book.id %}" style="color: var(--primary); text-decoration: none;">
-              {{ item.book.name }}
-            </a>
-          </td>
-          <td style="vertical-align: middle; padding: 8px 10px;">
-            {% for i in "12345" %}
-              {% if i|add:'0' <= item.book.average_rating %}
-                <span style="color:#FFD700; font-size: 1.2rem;">&#9733;</span>
-              {% else %}
-                <span style="color:#ccc; font-size: 1.2rem;">&#9733;</span>
-              {% endif %}
-            {% endfor %}
-            <br><small>({{ item.book.average_rating|floatformat:1 }}/5)</small>
-          </td>
-          <td style="padding: 8px 10px;">
-            <form method="post" action="{% url 'update_cart_quantity' item.book.id %}" style="display: inline-block;">
-              {% csrf_token %}
-              <input type="number" name="quantity" value="{{ item.quantity }}" min="1" style="width: 55px; padding: 4px; border-radius: 4px; border: 1px solid var(--border); text-align:center;">
-              <button type="submit" style="padding: 5px 12px; margin-left: 5px; border-radius: 4px; background: var(--primary); color: white; border: none; cursor: pointer;">
-                Update
-              </button>
-            </form>
-          </td>
-          <td style="padding: 8px 10px; font-weight: 600;">
-            ${{ item.book.price }}
-          </td>
-          <td style="padding: 8px 10px; font-weight: 700; color: var(--primary);">
-            ${{ item.quantity|mul:item.book.price|floatformat:2 }}
-          </td>
-        </tr>
+          <div class="table-row">
+            <div data-label="Image">
+              <img src="{{ item.book.picture.url }}" alt="{{ item.book.name }}" class="book-image">
+            </div>
+            <div data-label="Title">
+              <a href="{% url 'book_detail' item.book.id %}" class="book-link">
+                {{ item.book.name }}
+              </a>
+            </div>
+            <div data-label="Rating">
+              <div class="rating-stars">
+                {% for i in "12345" %}
+                  {% if i|add:'0' <= item.book.average_rating %}
+                    ★
+                  {% else %}
+                    <span style="color:#ccc;">★</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="rating-value">
+                ({{ item.book.average_rating|floatformat:1 }}/5)
+              </div>
+            </div>
+            <div data-label="Quantity">
+              <form method="post" action="{% url 'update_cart_quantity' item.book.id %}" class="quantity-form">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input">
+                <button type="submit" class="btn-update">
+                  Update
+                </button>
+              </form>
+            </div>
+            <div class="price-cell" data-label="Unit Price">
+              ${{ item.book.price }}
+            </div>
+            <div class="total-cell" data-label="Total">
+              ${{ item.quantity|mul:item.book.price|floatformat:2 }}
+            </div>
+          </div>
         {% endfor %}
-      </tbody>
-    </table>
+      </div>
 
-    <hr style="margin: 2rem 0; border: 1px solid var(--border);">
+      <div class="divider"></div>
 
-    <p style="font-weight: 700; font-size: 1.3rem; text-align: right; margin: 0;">
-      Total: ${{ total_price|floatformat:2 }}
-    </p>
+      <div class="total-section">
+        <span class="total-label">Total:</span>
+        <span class="total-amount">${{ total_price|floatformat:2 }}</span>
+      </div>
 
-    <div style="margin-top: 2rem; display: flex; gap: 12px; justify-content: flex-end;">
-      <form method="post" action="{% url 'checkout' %}">
-        {% csrf_token %}
-        <button type="submit" style="padding: 12px 28px; font-weight: 700; font-size: 1rem; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer;">
-          Confirm Purchase
-        </button>
-      </form>
+      <div class="action-buttons">
+        <form method="post" action="{% url 'checkout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-shopping-bag"></i>
+            Confirm Purchase
+          </button>
+        </form>
 
-      <form method="post" action="{% url 'cancel_checkout' %}">
-        {% csrf_token %}
-        <button type="submit" style="padding: 12px 28px; font-weight: 700; font-size: 1rem; border-radius: 8px; background: var(--text-secondary); color: white; border: none; cursor: pointer;">
-          Cancel
-        </button>
-      </form>
+        <form method="post" action="{% url 'cancel_checkout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-secondary">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+        </form>
+      </div>
     </div>
 
-{% else %}
-<div style="max-width: 400px; margin: 4rem auto; text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.3rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <img src="https://media.istockphoto.com/id/861576608/vector/empty-shopping-bag-icon-online-business-vector-icon-template.jpg?s=612x612&w=0&k=20&c=I7MbHHcjhRH4Dy0NVpf4ZN4gn8FVDnwn99YdRW2x5k0=" alt="Empty cart icon" style="max-width: 240px; margin-bottom: 2rem; opacity: 0.75;">
-  <p>Your cart is empty.</p>
-</div>
-{% endif %}
-
+  {% else %}
+    <div class="checkout-content">
+      <div class="empty-cart">
+        <img src="https://media.istockphoto.com/id/861576608/vector/empty-shopping-bag-icon-online-business-vector-icon-template.jpg?s=612x612&w=0&k=20&c=I7MbHHcjhRH4Dy0NVpf4ZN4gn8FVDnwn99YdRW2x5k0="
+             alt="Empty cart icon" class="empty-icon">
+        <p class="empty-text">Your cart is empty.</p>
+        <a href="{% url 'searchbooks' %}" class="btn-primary">
+          <i class="fas fa-book"></i>
+          Browse Books
+        </a>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

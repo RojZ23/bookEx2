@@ -3,66 +3,407 @@
 {% load custom_tier_filters %}  {# load your custom filter module for tier comparison #}
 
 {% block content %}
-<section style="max-width: 900px; margin: 3rem auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <h2 style="text-align: center; color: var(--primary); font-weight: 800; margin-bottom: 2rem;">
-    Exclusive Books for Supporters
-  </h2>
+<style>
+  .exclusive-container {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 18px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a855f7, #8b5cf6, #f59e0b);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.9);
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: clamp(2rem, 3vw + 1rem, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #a855f7, #8b5cf6, #f59e0b);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .page-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .writer-actions {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .btn-premium {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: radial-gradient(circle at top left, #a855f7, #8b5cf6);
+    color: white;
+    box-shadow: 0 12px 30px rgba(168, 85, 247, 0.4);
+  }
+
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(168, 85, 247, 0.6);
+  }
+
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+  }
+
+  .book-card {
+    width: 100%;
+    max-width: 240px;
+    background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(24px);
+    transition: all 0.3s ease;
+  }
+
+  .book-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+  }
+
+  .exclusive-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: radial-gradient(circle at top left, #a855f7, #8b5cf6);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+    z-index: 2;
+  }
+
+  .book-cover {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .book-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .book-author {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  .book-price {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f59e0b;
+    margin-bottom: 1rem;
+  }
+
+  .book-tier {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding: 4px 8px;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-primary {
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.6);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+  }
+
+  .btn-outline:hover {
+    background: rgba(15, 23, 42, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .upgrade-prompt {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    text-align: center;
+  }
+
+  .upgrade-text {
+    color: #ef4444;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .upgrade-link {
+    color: #60a5fa;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .upgrade-link:hover {
+    color: #a855f7;
+    text-decoration: underline;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .book-card {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  body.light-mode .upgrade-prompt {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  body.light-mode .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  body.light-mode .book-tier {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  @media (max-width: 768px) {
+    .exclusive-container {
+      padding: 2rem 1rem;
+    }
+
+    .books-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .book-card {
+      padding: 1rem;
+    }
+
+    .book-cover {
+      height: 160px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .books-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="exclusive-container">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span>Premium Collection</span>
+    </div>
+
+    <h1 class="page-title">Exclusive Books for Supporters</h1>
+
+    <p class="page-subtitle">
+      Discover premium content available only to our valued supporters and writers.
+      Upgrade your subscription to unlock more exclusive books.
+    </p>
+  </div>
 
   {% if is_writer %}
-    <div style="text-align: center; margin-bottom: 2rem;">
-      <a href="{% url 'post_exclusive_book' %}"
-         style="background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px;
-                text-decoration: none; font-weight: 700; box-shadow: 0 4px 12px rgba(53,112,255,0.6);">
+    <div class="writer-actions">
+      <a href="{% url 'post_exclusive_book' %}" class="btn-premium">
+        <i class="fas fa-plus-circle"></i>
         Post New Exclusive Book
       </a>
     </div>
   {% endif %}
 
   {% if books %}
-    <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+    <div class="books-grid">
       {% for book in books %}
-        <div style="width: 180px; background: var(--bg-secondary); border-radius: 10px; padding: 1rem; box-shadow: var(--shadow); text-align: center; position: relative;">
-
-          <div style="position: absolute; top: 8px; right: 8px; background: gold; color: black; font-weight: 700; font-size: 0.8rem; padding: 3px 6px; border-radius: 4px;">
+        <div class="book-card">
+          <div class="exclusive-badge">
+            <i class="fas fa-crown"></i>
             EXCLUSIVE
           </div>
 
-          <img src="{{ book.picture.url }}" alt="{{ book.name }}"
-               style="width: 100%; border-radius: 8px; height: 220px; object-fit: cover; margin-bottom: 0.75rem;">
+          <div class="book-cover">
+            <img src="{{ book.picture.url }}" alt="{{ book.name }}">
+          </div>
 
-          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            {{ book.name }}
-          </h3>
+          <h3 class="book-title">{{ book.name }}</h3>
+          <p class="book-author">By {{ book.username }}</p>
+          <p class="book-price">${{ book.price }}</p>
 
-          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">By {{ book.username }}</p>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${{ book.price }}</p>
+          {% if book.exclusive_meta.allowed_tiers %}
+            <span class="book-tier">
+              Tier: {{ book.exclusive_meta.allowed_tiers }}
+            </span>
+          {% endif %}
 
           {% comment %} Compare user tier with book allowed tier using custom template tag {% endcomment %}
           {% is_tier_lower user_tier book.exclusive_meta.allowed_tiers as user_below_tier %}
           {% if user_below_tier and not is_writer %}
-            <p style="color: red; font-weight: 700; margin-top: 12px;">
-              Want to view book?
-              <a href="{% url 'user_settings' %}" style="color: var(--primary); text-decoration: underline;">Upgrade your subscription today!</a>
-            </p>
+            <div class="upgrade-prompt">
+              <p class="upgrade-text">
+                <i class="fas fa-lock"></i>
+                Upgrade Required
+              </p>
+              <a href="{% url 'user_settings' %}" class="upgrade-link">
+                Upgrade your subscription to view this book
+              </a>
+            </div>
           {% else %}
-            <a href="{% url 'exclusive_book_detail' book.id %}" style="display: inline-block; background: var(--primary);
-              color: white; font-weight: 600; text-decoration: none; padding: 8px 12px; border-radius: 8px;
-              transition: 0.3s all;">View Details</a>
+            <a href="{% url 'exclusive_book_detail' book.id %}" class="btn-primary">
+              <i class="fas fa-eye"></i>
+              View Details
+            </a>
           {% endif %}
 
-            {% if user == book.username and user.userprofile.role == "Writer" %}
-              <form action="{% url 'edit_book' book.id %}" method="get" style="margin-top: 12px;">
-                <button type="submit" style="padding: 8px 18px; border-radius: 8px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer;">
-                  Edit Book
-                </button>
-              </form>
-            {% endif %}
-
+          {% if user == book.username and user.userprofile.role == "Writer" %}
+            <form action="{% url 'edit_book' book.id %}" method="get">
+              <button type="submit" class="btn-outline">
+                <i class="fas fa-edit"></i>
+                Edit Book
+              </button>
+            </form>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem; font-size: 1.1rem;">No exclusive books available yet.</p>
+    <div class="empty-state">
+      <i class="fas fa-book-open empty-icon"></i>
+      <p>No exclusive books available yet.</p>
+      {% if is_writer %}
+        <p style="margin-top: 1rem;">Be the first to post an exclusive book!</p>
+        <a href="{% url 'post_exclusive_book' %}" class="btn-premium" style="margin-top: 1.5rem;">
+          <i class="fas fa-plus-circle"></i>
+          Post Your First Exclusive Book
+        </a>
+      {% else %}
+        <p style="margin-top: 1rem;">Check back later for premium content.</p>
+      {% endif %}
+    </div>
   {% endif %}
-</section>
+</div>
 {% endblock %}

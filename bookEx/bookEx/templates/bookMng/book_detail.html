@@ -1,190 +1,623 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-<div style="max-width: 850px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-primary); background: #14213d; padding: 24px 28px; border-radius: 20px; box-shadow: 0 10px 32px rgba(53,112,255,0.6);">
- <h1 style="font-weight: 700; color: var(--primary); font-size: 2.6rem; text-align: left; letter-spacing: 1px; margin-bottom: 1rem;">
-   {{ book.name }}
- </h1>
+<style>
+  .book-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 2.5rem 2rem;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+                rgba(15, 23, 42, 0.96);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    backdrop-filter: blur(24px);
+  }
 
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 18px;
+  }
 
- <div style="display: flex; gap: 25px;">
-   <div style="flex: 0 0 200px; height: 220px; overflow: hidden; border-radius: 16px; filter: drop-shadow(0 0 12px var(--primary));">
-     <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" />
-   </div>
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
 
+  .book-title {
+    font-weight: 700;
+    font-size: clamp(2rem, 3vw + 1rem, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
 
-   <div style="flex: 1 1 auto; min-width: 300px; color: var(--text-primary); font-size: 16px;">
-     <p><strong>Price:</strong> ${{ book.price }}</p>
-     <p><strong>Posted by:</strong> {{ book.username }}</p>
-     <p><strong>Published:</strong> {{ book.publishdate|date:"M. d, Y" }}</p>
+  .book-layout {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
 
+  .book-cover {
+    flex: 0 0 220px;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(79, 70, 229, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
 
-     <p><strong>Website:</strong> <a href="{{ book.web }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Visit Website</a></p>
+  .book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
+  .book-details {
+    flex: 1;
+    min-width: 300px;
+  }
 
-     {% if user.is_authenticated %}
-       <form action="{% url 'add_to_cart' book.id %}" method="get" style="margin-top: 15px;">
-         <button type="submit" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 8px 28px rgba(53, 112, 255, 0.7); cursor: pointer; transition: background 0.3s;">
-           Add to Cart
-         </button>
-       </form>
-     {% else %}
-       <form action="{% url 'login' %}" method="get" style="margin-top: 15px;">
-         <button type="submit" style="width: 100%; background: #444; color: white; border: none; padding: 14px 0; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer;">
-           Login to purchase this book
-         </button>
-       </form>
-     {% endif %}
+  .detail-item {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
 
+  .detail-item strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
 
-     {% if user == book.username and user.userprofile.role == "Writer" %}
-       <form action="{% url 'edit_book' book.id %}" method="get" style="margin-top: 12px;">
-         <button type="submit" style="padding: 8px 18px; border-radius: 8px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer;">
-           Edit Book
-         </button>
-       </form>
-     {% endif %}
+  .detail-item a {
+    color: #60a5fa;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
 
+  .detail-item a:hover {
+    color: #a855f7;
+    text-decoration: underline;
+  }
 
-     <div style="margin-top: 20px; display: flex; gap: 18px;">
-       <form action="{% url 'rate_book' book.id %}" method="get" style="flex: 1;">
-         <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #fca311; border-radius: 10px; box-shadow: 0 8px 22px rgba(252,163,17,0.7); border: none; cursor: pointer; color: #1a1a1a;">
-           Rate this Book
-         </button>
-       </form>
-       <form action="{% url 'searchbooks' %}" method="get" style="flex: 1;">
-         <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: var(--primary); border-radius: 10px; box-shadow: 0 10px 30px rgba(53,112,255,0.9); border: none; cursor: pointer; color: white;">
-           Back to Search
-         </button>
-       </form>
-       {% if user.is_authenticated %}
-         <form action="{% url 'toggle_favorite' book.id %}" method="post" style="flex: 1;">
-           {% csrf_token %}
-           {% if user in book.favorites.all %}
-             <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: #dc3545; border-radius: 10px; box-shadow: 0 5px 18px rgba(220,53,69,0.6); border: none; cursor: pointer; color: white;">
-               Remove from Favorites
-             </button>
-           {% else %}
-             <button type="submit" style="width: 100%; padding: 12px 0; font-weight: 700; background: transparent; border: 2px solid var(--primary); border-radius: 10px; color: var(--primary); cursor: pointer;">
-               Add to Favorites
-             </button>
-           {% endif %}
-         </form>
-       {% endif %}
-     </div>
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
 
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    width: 100%;
+  }
 
-     <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Ratings</h3>
-     {% if ratings %}
-       <p style="font-weight: 600; font-size: 1.1rem;">Average Rating:
-         {% if avg_rating %}
-         <span style="color: #FFD700; font-size: 1.5rem; margin-left: 12px; user-select:none;">
-           {% for i in "12345" %}
-             {% if avg_rating|floatformat:1 >= i %}
-               ★
-             {% elif avg_rating|floatformat:1 > i|add:"-1" %}
-               <span style="position: relative; display:inline-block; width: 1em; color: #FFD700; overflow: hidden;">
-                 ★
-                 <span style="position: absolute; left: 0; top: 0; width: 50%; color: #ccc;">★</span>
-               </span>
-             {% else %}
-               <span style="color: #ccc;">★</span>
-             {% endif %}
-           {% endfor %}
-         </span>
-         <span style="font-size: 1rem; color: var(--text-secondary); margin-left: 10px;">({{ avg_rating }}/5)</span>
-         {% else %}
-         <span style="font-style: italic; color: var(--text-secondary); margin-left: 10px;">No ratings yet</span>
-         {% endif %}
-       </p>
+  .btn-primary {
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: white;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+  }
 
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.6);
+  }
 
-       <ul style="list-style:none; margin-top: 12px; padding-left: 0;">
-         {% for rate in ratings %}
-         <li style="margin-bottom: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: var(--text-secondary);">
-           <div><strong>{% if rate.user == user %}You{% else %}Anonymous{% endif %}</strong></div>
-           <div>
-             {% for i in "12345" %}
-               {% if i|add:"0" <= rate.rating %}
-                 <span style="color:#FFD700; font-size:1.3rem;">★</span>
-               {% else %}
-                 <span style="color:#ccc; font-size:1.3rem;">★</span>
-               {% endif %}
-             {% endfor %}
-           </div>
-           {% if rate.user == user %}
-           <form method="post" action="{% url 'delete_rating' rate.id %}">
-             {% csrf_token %}
-             <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Delete</button>
-           </form>
-           {% endif %}
-         </li>
-         {% endfor %}
-       </ul>
-     {% else %}
-       <form action="{% url 'rate_book' book.id %}" method="get" style="margin-top: 12px;">
-         <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Be the first to rate this book</button>
-       </form>
-     {% endif %}
+  .btn-secondary {
+    background: radial-gradient(circle at top left, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
+  }
 
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(245, 158, 11, 0.6);
+  }
 
-     <h3 style="margin-top: 36px; color: var(--primary); font-weight: 700;">Comments</h3>
-     {% if user.is_authenticated %}
-       <form method="post" action="{% url 'add_comment' book.id %}">
-         {% csrf_token %}
-         <textarea name="content" rows="3" placeholder="Add your comment here" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; font-size: 1rem; resize: vertical;"></textarea>
-         <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Submit Comment</button>
-       </form>
-     {% else %}
-       <form action="{% url 'login' %}" method="get">
-         <button type="submit" style="background: var(--text-secondary); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer;">Login to add comments</button>
-       </form>
-     {% endif %}
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+  }
 
+  .btn-outline:hover {
+    background: rgba(15, 23, 42, 0.8);
+    transform: translateY(-2px);
+  }
 
-     {% if book.comments.all %}
-       <ul style="list-style:none; padding-left:0; margin-top: 20px;">
-         {% for comment in book.comments.all %}
-         <li style="background: var(--bg-secondary); margin-bottom: 14px; border-radius: 10px; padding: 12px; font-size: 1rem; color: var(--text-primary);">
-           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-             <div>
-               <strong>{{ comment.user.username }}</strong>
-               <small style="color: var(--text-secondary); margin-left: 10px;">{{ comment.created_at|date:"M d, Y H:i" }}</small>
-             </div>
-             {% if user == comment.user %}
-             <div style="display: flex; gap: 8px;">
-               <form method="get" action="{% url 'book_detail' book.id %}">
-                 <input type="hidden" name="edit_comment" value="{{ comment.id }}">
-                 <button type="submit" style="background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 6px 16px; border-radius: 8px; cursor: pointer;">Edit</button>
-               </form>
-               <form method="post" action="{% url 'delete_comment' comment.id %}">
-                 {% csrf_token %}
-                 <button type="submit" style="background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer;">Delete</button>
-               </form>
-             </div>
-             {% endif %}
-           </div>
+  .btn-danger {
+    background: radial-gradient(circle at top left, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.4);
+  }
 
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(239, 68, 68, 0.6);
+  }
 
-           {% if user == comment.user and request.GET.edit_comment|stringformat:"s" == comment.id|stringformat:"s" %}
-             <form method="post" action="{% url 'edit_comment' comment.id %}">
-               {% csrf_token %}
-               <textarea name="content" rows="3" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem;">{{ comment.content }}</textarea>
-               <button type="submit" style="margin-top: 8px; background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Save</button>
-               <a href="{% url 'book_detail' book.id %}" style="margin-left: 10px; padding: 10px 24px; border-radius: 12px; border: 2px solid var(--primary); color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none;">Cancel</a>
-             </form>
-           {% else %}
-             <p>{{ comment.content }}</p>
-           {% endif %}
-         </li>
-         {% endfor %}
-       </ul>
-     {% else %}
-       <p style="font-style: italic; color: var(--text-secondary); font-size: 1.1rem; margin-top: 16px;">No comments yet. Be the first to add one!</p>
-     {% endif %}
-   </div>
- </div>
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 2.5rem 0 1.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .rating-display {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .average-rating {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .star-rating {
+    color: #f59e0b;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-right: 1rem;
+  }
+
+  .rating-value {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+
+  .ratings-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .rating-item {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .rating-user {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .rating-stars {
+    color: #f59e0b;
+    font-size: 1.2rem;
+  }
+
+  .comment-form {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .form-textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+  }
+
+  .comments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .comment-item {
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .comment-user {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+  }
+
+  .comment-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .comment-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .edit-form {
+    margin-top: 1rem;
+  }
+
+  /* Light mode adjustments */
+  body.light-mode .book-container {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .badge {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #718096;
+  }
+
+  body.light-mode .rating-display,
+  body.light-mode .comment-form,
+  body.light-mode .comment-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .rating-item {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .form-textarea {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  body.light-mode .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  @media (max-width: 768px) {
+    .book-container {
+      margin: 2rem 1rem;
+      padding: 2rem 1.5rem;
+    }
+
+    .book-layout {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .book-cover {
+      align-self: center;
+      flex: 0 0 auto;
+      width: 200px;
+      height: 250px;
+    }
+
+    .quick-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .comment-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .comment-actions {
+      align-self: flex-end;
+    }
+  }
+</style>
+
+<div class="book-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Book Details</span>
+  </div>
+
+  <h1 class="book-title">{{ book.name }}</h1>
+
+  <div class="book-layout">
+    <div class="book-cover">
+      <img src="{{ book.picture.url }}" alt="{{ book.name }} Cover">
+    </div>
+
+    <div class="book-details">
+      <div class="detail-item">
+        <strong>Price:</strong> ${{ book.price }}
+      </div>
+      <div class="detail-item">
+        <strong>Posted by:</strong> {{ book.username }}
+      </div>
+      <div class="detail-item">
+        <strong>Published:</strong> {{ book.publishdate|date:"M. d, Y" }}
+      </div>
+      <div class="detail-item">
+        <strong>Website:</strong>
+        <a href="{{ book.web }}" target="_blank">Visit Website</a>
+      </div>
+
+      <div class="action-buttons">
+        {% if user.is_authenticated %}
+          <form action="{% url 'add_to_cart' book.id %}" method="get">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-shopping-cart"></i>
+              Add to Cart
+            </button>
+          </form>
+        {% else %}
+          <form action="{% url 'login' %}" method="get">
+            <button type="submit" class="btn-outline">
+              <i class="fas fa-sign-in-alt"></i>
+              Login to Purchase
+            </button>
+          </form>
+        {% endif %}
+
+        {% if user == book.username and user.userprofile.role == "Writer" %}
+          <form action="{% url 'edit_book' book.id %}" method="get">
+            <button type="submit" class="btn-outline">
+              <i class="fas fa-edit"></i>
+              Edit Book
+            </button>
+          </form>
+        {% endif %}
+      </div>
+
+      <div class="quick-actions">
+        <form action="{% url 'rate_book' book.id %}" method="get">
+          <button type="submit" class="btn-secondary">
+            <i class="fas fa-star"></i>
+            Rate Book
+          </button>
+        </form>
+        <form action="{% url 'searchbooks' %}" method="get">
+          <button type="submit" class="btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Back to Search
+          </button>
+        </form>
+        {% if user.is_authenticated %}
+          <form action="{% url 'toggle_favorite' book.id %}" method="post" style="grid-column: span 2;">
+            {% csrf_token %}
+            {% if user in book.favorites.all %}
+              <button type="submit" class="btn-danger">
+                <i class="fas fa-heart-broken"></i>
+                Remove from Favorites
+              </button>
+            {% else %}
+              <button type="submit" class="btn-outline">
+                <i class="fas fa-heart"></i>
+                Add to Favorites
+              </button>
+            {% endif %}
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ratings Section -->
+  <h2 class="section-title">
+    <i class="fas fa-star"></i>
+    Ratings
+  </h2>
+
+  {% if ratings %}
+    <div class="rating-display">
+      <div class="average-rating">
+        Average Rating:
+        <span class="star-rating">
+          {% for i in "12345" %}
+            {% if avg_rating|floatformat:1 >= i %}
+              ★
+            {% elif avg_rating|floatformat:1 > i|add:"-1" %}
+              <span style="position: relative; display:inline-block; width: 1em; color: #f59e0b; overflow: hidden;">
+                ★
+                <span style="position: absolute; left: 0; top: 0; width: 50%; color: #ccc;">★</span>
+              </span>
+            {% else %}
+              <span style="color: #ccc;">★</span>
+            {% endif %}
+          {% endfor %}
+        </span>
+        <span class="rating-value">({{ avg_rating }}/5)</span>
+      </div>
+
+      <ul class="ratings-list">
+        {% for rate in ratings %}
+          <li class="rating-item">
+            <div>
+              <span class="rating-user">
+                {% if rate.user == user %}You{% else %}Anonymous{% endif %}
+              </span>
+              <div class="rating-stars">
+                {% for i in "12345" %}
+                  {% if i|add:"0" <= rate.rating %}
+                    ★
+                  {% else %}
+                    <span style="color:#ccc;">★</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% if rate.user == user %}
+              <form method="post" action="{% url 'delete_rating' rate.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger btn-small">
+                  <i class="fas fa-trash"></i>
+                  Delete
+                </button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <form action="{% url 'rate_book' book.id %}" method="get">
+      <button type="submit" class="btn-secondary">
+        <i class="fas fa-star"></i>
+        Be the first to rate this book
+      </button>
+    </form>
+  {% endif %}
+
+  <!-- Comments Section -->
+  <h2 class="section-title">
+    <i class="fas fa-comments"></i>
+    Comments
+  </h2>
+
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add_comment' book.id %}" class="comment-form">
+      {% csrf_token %}
+      <textarea name="content" rows="3" placeholder="Add your comment here..." required class="form-textarea"></textarea>
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-paper-plane"></i>
+        Submit Comment
+      </button>
+    </form>
+  {% else %}
+    <form action="{% url 'login' %}" method="get">
+      <button type="submit" class="btn-outline">
+        <i class="fas fa-sign-in-alt"></i>
+        Login to Add Comments
+      </button>
+    </form>
+  {% endif %}
+
+  {% if book.comments.all %}
+    <ul class="comments-list">
+      {% for comment in book.comments.all %}
+        <li class="comment-item">
+          <div class="comment-header">
+            <div>
+              <span class="comment-user">{{ comment.user.username }}</span>
+              <div class="comment-date">{{ comment.created_at|date:"M d, Y H:i" }}</div>
+            </div>
+            {% if user == comment.user %}
+              <div class="comment-actions">
+                <form method="get" action="{% url 'book_detail' book.id %}">
+                  <input type="hidden" name="edit_comment" value="{{ comment.id }}">
+                  <button type="submit" class="btn-outline btn-small">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                  </button>
+                </form>
+                <form method="post" action="{% url 'delete_comment' comment.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-danger btn-small">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                  </button>
+                </form>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if user == comment.user and request.GET.edit_comment|stringformat:"s" == comment.id|stringformat:"s" %}
+            <form method="post" action="{% url 'edit_comment' comment.id %}" class="edit-form">
+              {% csrf_token %}
+              <textarea name="content" rows="3" required class="form-textarea">{{ comment.content }}</textarea>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button type="submit" class="btn-primary btn-small">
+                  <i class="fas fa-save"></i>
+                  Save
+                </button>
+                <a href="{% url 'book_detail' book.id %}" class="btn-outline btn-small" style="text-decoration: none;">
+                  <i class="fas fa-times"></i>
+                  Cancel
+                </a>
+              </div>
+            </form>
+          {% else %}
+            <p>{{ comment.content }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--text-secondary); font-style: italic;">
+      <i class="fas fa-comment-slash" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+      No comments yet. Be the first to add one!
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

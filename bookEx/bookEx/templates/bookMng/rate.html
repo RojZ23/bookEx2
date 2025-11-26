@@ -1,44 +1,247 @@
 {% extends 'base.html' %}
 {% block content %}
-<div style="max-width: 400px; margin: 3rem auto; padding: 2rem; background: var(--bg-secondary); border-radius: 14px; box-shadow: var(--shadow);">
-  <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Rate Book: {{ book.name }}</h2>
+<style>
+  .rate-book-section {
+    width: 100%;
+    max-width: 480px;
+    margin: 2rem auto;
+    position: relative;
+  }
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Your Rating:</label>
+  .rate-book-panel {
+    border-radius: 20px;
+    padding: 30px 28px;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+      rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+    text-align: center;
+  }
 
-    <div class="star-rating" style="display: flex; gap: 6px; margin-bottom: 1rem; cursor: pointer;">
-      {% for i in "12345" %}
-      <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required style="display:none;">
-      <label for="star{{ i }}" style="font-size: 2rem; color: #ccc; transition: color 0.2s;">&#9733;</label>
-      {% endfor %}
+  .rate-book-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .rate-book-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 16px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .rate-book-title {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #e5e7eb;
+  }
+
+  .rate-book-title span {
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .book-being-rated {
+    margin: 20px 0;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    font-size: 14px;
+    color: #9ca3af;
+  }
+
+  .book-being-rated strong {
+    color: #e5e7eb;
+    font-size: 1.1rem;
+  }
+
+  .rating-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .rating-label {
+    font-weight: 600;
+    color: #e5e7eb;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+
+  .star-rating input {
+    display: none;
+  }
+
+  .star-rating label {
+    font-size: 2.5rem;
+    color: rgba(148, 163, 184, 0.5);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .star-rating label:hover {
+    transform: scale(1.1);
+  }
+
+  .submit-button {
+    padding: 14px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+      0 12px 30px rgba(37, 99, 235, 0.7),
+      0 0 0 1px rgba(129, 140, 248, 0.7);
+    margin-top: 8px;
+  }
+
+  .submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 18px 40px rgba(37, 99, 235, 0.9),
+      0 0 0 1px rgba(191, 219, 254, 0.9);
+  }
+
+  .rating-note {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  .rating-note strong {
+    color: #a5b4fc;
+  }
+</style>
+
+<section class="rate-book-section">
+  <div class="rate-book-panel">
+    <div class="rate-book-header">
+      <div class="rate-book-badge">
+        <div class="badge-dot"></div>
+        <span>Share Your Opinion</span>
+      </div>
+      <h1 class="rate-book-title">
+        Rate this <span>Book</span>
+      </h1>
     </div>
 
-    <button type="submit" style="width: 100%; padding: 12px 0; background: var(--primary); color: white; font-weight: 700; font-size: 1.1rem; border: none; border-radius: 10px; cursor: pointer;">
-      Submit
-    </button>
-  </form>
-</div>
+    <div class="book-being-rated">
+      You're rating: <strong>{{ book.name }}</strong>
+    </div>
+
+    <form method="post" novalidate class="rating-form">
+      {% csrf_token %}
+
+      <div class="rating-label">Your Rating:</div>
+
+      <div class="star-rating">
+        {% for i in "12345" %}
+        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required>
+        <label for="star{{ i }}" data-rating="{{ i }}">&#9733;</label>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="submit-button">
+        Submit Rating
+      </button>
+    </form>
+
+    <div class="rating-note">
+      <strong>Tip:</strong> Your rating helps other readers discover great books and helps authors understand what readers enjoy.
+    </div>
+  </div>
+</section>
 
 <script>
-  const labels = document.querySelectorAll('.star-rating label');
-  const inputs = document.querySelectorAll('.star-rating input');
+  document.addEventListener('DOMContentLoaded', function() {
+    const labels = document.querySelectorAll('.star-rating label');
+    const inputs = document.querySelectorAll('.star-rating input');
 
-  labels.forEach((label, idx) => {
-    label.addEventListener('mouseover', () => {
-      labels.forEach((l, j) => l.style.color = j <= idx ? '#FFD700' : '#ccc');
+    // Function to update star colors
+    function updateStars(upToIndex) {
+      labels.forEach((label, idx) => {
+        if (idx <= upToIndex) {
+          label.style.color = '#FFD700';
+          label.style.textShadow = '0 0 12px rgba(255, 215, 0, 0.7)';
+        } else {
+          label.style.color = 'rgba(148, 163, 184, 0.5)';
+          label.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+        }
+      });
+    }
+
+    // Hover effects
+    labels.forEach((label, idx) => {
+      label.addEventListener('mouseover', () => {
+        updateStars(idx);
+      });
     });
-    label.addEventListener('mouseout', () => {
+
+    // Mouse out - revert to selected state
+    document.querySelector('.star-rating').addEventListener('mouseleave', () => {
       const checked = document.querySelector('.star-rating input:checked');
       if (checked) {
-        labels.forEach((l, j) => l.style.color = j < checked.value ? '#FFD700' : '#ccc');
+        updateStars(checked.value - 1);
       } else {
-        labels.forEach(l => l.style.color = '#ccc');
+        labels.forEach(label => {
+          label.style.color = 'rgba(148, 163, 184, 0.5)';
+          label.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+        });
       }
     });
-    label.addEventListener('click', () => {
-      inputs[idx].checked = true;
-      labels.forEach((l, j) => l.style.color = j < inputs[idx].value ? '#FFD700' : '#ccc');
+
+    // Click to select
+    labels.forEach((label, idx) => {
+      label.addEventListener('click', () => {
+        inputs[idx].checked = true;
+        updateStars(idx);
+      });
+    });
+
+    // Initialize with no stars selected
+    labels.forEach(label => {
+      label.style.color = 'rgba(148, 163, 184, 0.5)';
+      label.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
     });
   });
 </script>

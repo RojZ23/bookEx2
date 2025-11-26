@@ -1,68 +1,217 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<section style="max-width: 600px; margin: 3rem auto; background: var(--bg-secondary); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <h2 style="font-weight: 700; font-size: 2rem; color: var(--primary); margin-bottom: 1.5rem; text-align: center;">
-    Post Exclusive Book
-  </h2>
+<style>
+  .exclusive-book-section {
+    width: 100%;
+    max-width: 520px;
+    margin: 2rem auto;
+    position: relative;
+  }
 
-  <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
-    {% csrf_token %}
+  .exclusive-panel {
+    border-radius: 20px;
+    padding: 30px 28px;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+      rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+  }
 
-    <div style="display: flex; flex-direction: column;">
-      <label for="{{ form.name.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Book Title</label>
-      {{ form.name }}
-      {% for error in form.name.errors %}
-        <div style="color: red;">{{ error }}</div>
-      {% endfor %}
+  .exclusive-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .exclusive-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 16px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  .exclusive-title {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #e5e7eb;
+  }
+
+  .exclusive-title span {
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .exclusive-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #e5e7eb;
+    font-size: 14px;
+  }
+
+  .form-input, .form-select, .form-file {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.8);
+    color: #e5e7eb;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(24px);
+  }
+
+  .form-input:focus, .form-select:focus, .form-file:focus {
+    outline: none;
+    border-color: rgba(129, 140, 248, 0.7);
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
+  }
+
+  .form-file {
+    padding: 10px 16px;
+  }
+
+  .error-message {
+    color: #f87171;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .submit-button {
+    padding: 14px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+      0 12px 30px rgba(37, 99, 235, 0.7),
+      0 0 0 1px rgba(129, 140, 248, 0.7);
+    margin-top: 8px;
+  }
+
+  .submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 18px 40px rgba(37, 99, 235, 0.9),
+      0 0 0 1px rgba(191, 219, 254, 0.9);
+  }
+
+  .tier-info {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  .tier-info strong {
+    color: #a5b4fc;
+  }
+</style>
+
+<section class="exclusive-book-section">
+  <div class="exclusive-panel">
+    <div class="exclusive-header">
+      <div class="exclusive-badge">
+        <div class="badge-dot"></div>
+        <span>Exclusive Content</span>
+      </div>
+      <h1 class="exclusive-title">
+        Post <span>Exclusive</span> Book
+      </h1>
     </div>
 
-    <div style="display: flex; flex-direction: column;">
-      <label for="{{ form.web.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Book URL</label>
-      {{ form.web }}
-      {% for error in form.web.errors %}
-        <div style="color: red;">{{ error }}</div>
-      {% endfor %}
-    </div>
+    <form method="post" enctype="multipart/form-data" class="exclusive-form">
+      {% csrf_token %}
 
-    <div style="display: flex; flex-direction: column;">
-      <label for="{{ form.price.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Price ($)</label>
-      {{ form.price }}
-      {% for error in form.price.errors %}
-        <div style="color: red;">{{ error }}</div>
-      {% endfor %}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.name.id_for_label }}" class="form-label">Book Title</label>
+        {{ form.name }}
+        {% for error in form.name.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
 
-    <div style="display: flex; flex-direction: column;">
-      <label for="{{ form.picture.id_for_label }}" style="margin-bottom: 8px; font-weight: 600;">Upload Cover Image</label>
-      {{ form.picture }}
-      {% for error in form.picture.errors %}
-        <div style="color: red;">{{ error }}</div>
-      {% endfor %}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.web.id_for_label }}" class="form-label">Book URL</label>
+        {{ form.web }}
+        {% for error in form.web.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
 
-    <div style="display: flex; flex-direction: column;">
-      <label for="id_allowed_tiers" style="margin-bottom: 8px; font-weight: 600;">Allowed Subscription Tier</label>
-      <select id="id_allowed_tiers" name="allowed_tiers" style="padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem;">
-        <option value="Bronze">Bronze and above</option>
-        <option value="Silver">Silver and above</option>
-        <option value="Gold">Gold only</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="{{ form.price.id_for_label }}" class="form-label">Price ($)</label>
+        {{ form.price }}
+        {% for error in form.price.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
 
-    <button type="submit" style="
-      padding: 14px;
-      border-radius: 10px;
-      background-color: var(--primary);
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
-      transition: background-color 0.3s, box-shadow 0.3s;">
-      Post Exclusive Book
-    </button>
-  </form>
+      <div class="form-group">
+        <label for="{{ form.picture.id_for_label }}" class="form-label">Upload Cover Image</label>
+        {{ form.picture }}
+        {% for error in form.picture.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_allowed_tiers" class="form-label">Allowed Subscription Tier</label>
+        <select id="id_allowed_tiers" name="allowed_tiers" class="form-select">
+          <option value="Bronze">Bronze and above</option>
+          <option value="Silver">Silver and above</option>
+          <option value="Gold">Gold only</option>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-button">
+        Post Exclusive Book
+      </button>
+    </form>
+
+    <div class="tier-info">
+      <strong>Note:</strong> Exclusive books are only accessible to users with the required subscription tier.
+      Choose the tier level that determines who can purchase and view this exclusive content.
+    </div>
+  </div>
 </section>
 
 {% endblock %}
