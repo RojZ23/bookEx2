@@ -1,32 +1,208 @@
 {% extends "base.html" %}
 {% block content %}
-<section style="
-    max-width: 500px;
-    margin: 3rem auto;
-    background: var(--bg-secondary);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    text-align: center;
+<div class="shell" style="max-width: 980px; margin: 0 auto; padding: var(--space-lg); display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+  <div class="hero" style="max-width: 520px; text-align: center; gap: var(--space-lg);">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span>Registration Complete</span>
+    </div>
+
+    <h1 style="margin: 0;">
+      Account <span>Created</span>
+    </h1>
+
+    <p class="subtitle">
+      Thank you for registering. Your account has been created successfully.
+      <strong>You can now access all features</strong> and start generating study guides.
+    </p>
+
+    <aside class="panel" style="text-align: center; gap: var(--space-md);">
+      <div class="panel-title">
+        <span>Ready to Get Started?</span>
+        <span class="pill">Success</span>
+      </div>
+
+      <ul class="panel-list">
+        <li><span>•</span> Generate study guides from your notes</li>
+        <li><span>•</span> Create quizzes and flashcards</li>
+        <li><span>•</span> Save and organize your content</li>
+      </ul>
+
+      <a href="{% url 'login' %}" class="btn-primary" style="text-decoration: none; margin-top: var(--space-sm);">
+        Sign In to Your Account
+      </a>
+    </aside>
+
+    <p class="cta-note">
+      Need help getting started? <span>Check out our tutorial</span> or contact support.
+    </p>
+  </div>
+</div>
+
+<style>
+  .shell {
+    width: 100%;
+    max-width: 980px;
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;  /* vertical spacing between children */
     justify-content: center;
     align-items: center;
-">
-  <h1>User Registration Success!</h1>
-  <p>Thank you for registering. Your account has been created successfully.</p>
-  <a href="{% url 'login' %}" style="
-      font-weight: 700;
-      background-color: var(--primary);
-      color: white;
-      padding: 0.75rem 2rem;
-      border-radius: 10px;
-      text-decoration: none;
-      box-shadow: 0 6px 15px rgba(26,115,232,0.5);
-      transition: background-color 0.3s ease;
-  ">
-    Click Here to Login
-  </a>
-</section>
+  }
+
+  .hero {
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin: 0 auto;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 3vw + 1rem, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  h1 span {
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  .subtitle strong {
+    color: #e5e7eb;
+    font-weight: 500;
+  }
+
+  .panel {
+    position: relative;
+    border-radius: 20px;
+    padding: 20px 18px;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+      rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pill {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(129, 140, 248, 0.7);
+    color: #c7d2fe;
+    background: rgba(15, 23, 42, 0.8);
+    white-space: nowrap;
+  }
+
+  .panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .panel-list li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .panel-list li span {
+    color: #a5b4fc;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform 0.07s ease-out,
+      box-shadow 0.1s ease-out,
+      background 0.1s ease-out,
+      color 0.1s ease-out;
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    box-shadow:
+      0 12px 30px rgba(37, 99, 235, 0.7),
+      0 0 0 1px rgba(129, 140, 248, 0.7);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 18px 40px rgba(37, 99, 235, 0.9),
+      0 0 0 1px rgba(191, 219, 254, 0.9);
+  }
+
+  .cta-note {
+    margin: 0;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+
+  .cta-note span {
+    color: #a5b4fc;
+  }
+</style>
 {% endblock %}

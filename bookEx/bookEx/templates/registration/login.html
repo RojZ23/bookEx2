@@ -2,47 +2,297 @@
 {% load static %}
 
 {% block sidenav %}
-   <li><a href="/" style="display: inline-block; padding: 8px 16px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">Home</a></li>
+   <li><a href="/" class="btn-outline" style="display: inline-block; padding: 8px 16px; text-decoration: none; font-weight: 500; font-size: 13px;">Home</a></li>
 {% endblock sidenav %}
 
 {% block content %}
-<div style="max-width: 700px; margin: 3rem auto; display: flex; align-items: center; gap: 2rem; background: var(--bg-secondary); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<div class="shell" style="max-width: 980px; margin: 0 auto; padding: var(--space-lg); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center;">
 
-  <!-- Left Image -->
-  <div style="flex: 1 1 40%; display: flex; justify-content: center;">
-    <img src="https://cdn.mos.cms.futurecdn.net/v2/t:0,l:122,cw:726,ch:545,q:80,w:726/pk2A58d5MnYCSGKAi2mGVS.jpg" alt="Login Illustration" style="max-width: 100%; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+  <!-- Left Image Section -->
+  <div class="hero" style="max-width: none; gap: var(--space-lg);">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span>Welcome Back</span>
+    </div>
+
+    <h1 style="margin: 0;">
+      Login to Your <span>Account</span>
+    </h1>
+
+    <p class="subtitle">
+      Access your personalized study guides, quizzes, and flashcards.
+      <strong>Continue your learning journey</strong> right where you left off.
+    </p>
+
+    <div style="display: flex; justify-content: center; margin-top: var(--space-md);">
+      <img src="https://cdn.mos.cms.futurecdn.net/v2/t:0,l:122,cw:726,ch:545,q:80,w:726/pk2A58d5MnYCSGKAi2mGVS.jpg"
+           alt="Login Illustration"
+           style="max-width: 100%; border-radius: 16px; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);">
+    </div>
   </div>
 
   <!-- Right Login Form -->
-  <section style="flex: 1 1 60%;">
-    <h1 style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; color: var(--primary); font-weight: 700; font-size: 2.2rem;">
-      <i class="fas fa-user-circle" style="font-size: 2.6rem;"></i>
-      User Login
-    </h1>
+  <aside class="panel" style="gap: var(--space-md);">
+    <div class="panel-title">
+      <span>Account Login</span>
+      <span class="pill">Secure</span>
+    </div>
 
-    <form action="{% url 'login' %}" method="post" novalidate>
+    <form action="{% url 'login' %}" method="post" novalidate style="display: flex; flex-direction: column; gap: var(--space-md);">
       {% csrf_token %}
-      <table style="width: 100%; border-spacing: 0 1rem;">
-        {{ form.as_table }}
-        <tr>
-          <td colspan="2" style="text-align: center; padding-top: 0.5rem;">
-            <input type="submit" value="Login"
-                   style="background: var(--primary); color: white; padding: 12px 30px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s ease;">
-          </td>
-        </tr>
-      </table>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+        {% for field in form %}
+        <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+          <label for="{{ field.id_for_label }}" style="font-size: 13px; color: #9ca3af; font-weight: 500;">
+            {{ field.label }}
+          </label>
+          {{ field }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; margin-top: var(--space-sm);">
+        Sign In
+      </button>
     </form>
 
-    <hr style="margin: 2rem 0; border: none; border-top: 2px solid var(--border);">
-
-    <div style="display: flex; justify-content: center; align-items: center; gap: 16px;">
-      <a href="{% url 'register' %}" style="padding: 12px 30px; background: var(--primary); color: white; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 1.1rem; cursor: pointer; transition: background 0.3s ease;">
-        Register
-      </a>
-      <span style="color: var(--text-secondary); font-size: 1rem;">
-        Don't have an account? Register today!
-      </span>
+    <div style="border-top: 1px solid rgba(148, 163, 184, 0.35); margin: var(--space-md) 0; padding-top: var(--space-md);">
+      <div class="cta-row">
+        <a href="{% url 'register' %}" class="btn-outline" style="flex: 1; text-align: center; text-decoration: none;">
+          Create Account
+        </a>
+      </div>
+      <p class="cta-note" style="text-align: center; margin-top: var(--space-sm);">
+        New to our platform? <span>Register today</span> and get started!
+      </p>
     </div>
-  </section>
+
+    <ul class="panel-list">
+      <li><span>•</span> Access all your study guides</li>
+      <li><span>•</span> Save your progress and favorites</li>
+      <li><span>•</span> Generate new content anytime</li>
+    </ul>
+  </aside>
 </div>
+
+<style>
+  .shell {
+    width: 100%;
+    max-width: 980px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hero {
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.9);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    width: fit-content;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+    box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 3vw + 1rem, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  h1 span {
+    background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    max-width: 430px;
+  }
+
+  .subtitle strong {
+    color: #e5e7eb;
+    font-weight: 500;
+  }
+
+  .panel {
+    position: relative;
+    border-radius: 20px;
+    padding: 20px 18px;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+      rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(24px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pill {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(129, 140, 248, 0.7);
+    color: #c7d2fe;
+    background: rgba(15, 23, 42, 0.8);
+    white-space: nowrap;
+  }
+
+  .panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .panel-list li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .panel-list li span {
+    color: #a5b4fc;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform 0.07s ease-out,
+      box-shadow 0.1s ease-out,
+      background 0.1s ease-out,
+      color 0.1s ease-out;
+    border: none;
+  }
+
+  .btn-primary {
+    background: radial-gradient(circle at top left, #4f46e5, #2563eb);
+    color: #e5e7eb;
+    box-shadow:
+      0 12px 30px rgba(37, 99, 235, 0.7),
+      0 0 0 1px rgba(129, 140, 248, 0.7);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 18px 40px rgba(37, 99, 235, 0.9),
+      0 0 0 1px rgba(191, 219, 254, 0.9);
+  }
+
+  .btn-outline {
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    color: #e5e7eb;
+    background: rgba(15, 23, 42, 0.6);
+  }
+
+  .btn-outline:hover {
+    background: rgba(15, 23, 42, 0.95);
+    transform: translateY(-1px);
+  }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cta-note {
+    margin: 0;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+
+  .cta-note span {
+    color: #a5b4fc;
+  }
+
+  /* Form input styling to match the theme */
+  form input[type="text"],
+  form input[type="password"],
+  form input[type="email"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    color: #e5e7eb;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  form input:focus {
+    outline: none;
+    border-color: rgba(129, 140, 248, 0.8);
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  form label {
+    font-size: 13px;
+    color: #9ca3af;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+</style>
 {% endblock content %}
