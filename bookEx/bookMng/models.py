@@ -44,6 +44,8 @@ class ShoppingCart(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     checked_out = models.BooleanField(default=False)  # marks if purchased
+    # NEW: when this item was checked out
+    checked_out_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.book.name} for {self.user.username}"
@@ -119,3 +121,12 @@ class ExclusiveBookMeta(models.Model):
 
     def __str__(self):
         return f"{self.book.name} exclusive metadata"
+
+class SubscriptionChange(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    previous_tier = models.CharField(max_length=10)
+    new_tier = models.CharField(max_length=10)
+    changed_at = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.previous_tier} → {self.new_tier} at {self.changed_at}"

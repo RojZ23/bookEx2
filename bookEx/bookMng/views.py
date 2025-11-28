@@ -29,6 +29,9 @@ from datetime import date
 import json
 from django.conf import settings
 import requests
+from django.utils.timezone import now
+from .models import SubscriptionChange
+
 
 def index(request):
    return render(request, 'bookMng/index.html', { 'item_list': MainMenu.objects.all() })
@@ -66,14 +69,45 @@ def postbook(request):
         'item_list': MainMenu.objects.all(),
     })
 
+@login_required
 def displaybooks(request):
-    books = Book.objects.filter(is_exclusive=False)
-    for b in books:
-        b.pic_path = b.picture.url.split('/static/')[-1]
-    return render(request, 'bookMng/displaybooks.html', {
+    """
+    Show user's purchase history and subscription history
+    in a recipe-card style layout.
+    """
+    # All checked-out cart rows for this user (each row = a "purchase event")
+    purchased_items = (
+        ShoppingCart.objects
+        .filter(user=request.user, checked_out=True)
+        .select_related('book')
+        .order_by('-checked_out_at', '-id')
+    )
+
+    # Build a simple list for the template
+    purchases = []
+    for item in purchased_items:
+        book = item.book
+        purchases.append({
+            'title': book.name,
+            'quantity': item.quantity,
+            'purchased_at': item.checked_out_at,
+            'is_exclusive': book.is_exclusive,
+            'price': book.price,
+        })
+
+    # Subscription history
+    subscription_events = (
+        SubscriptionChange.objects
+        .filter(user=request.user)
+        .order_by('-changed_at')
+    )
+
+    context = {
         'item_list': MainMenu.objects.all(),
-        'books': books
-    })
+        'purchases': purchases,
+        'subscription_events': subscription_events,
+    }
+    return render(request, 'bookMng/displaybooks.html', context)
 
 @login_required
 def exclusive_book_detail(request, book_id):
@@ -258,6 +292,18 @@ def user_settings(request):
         new_role = request.POST.get('role')
         new_tier = request.POST.get('tier')
         old_tier = profile.tier
+
+        if profile.role == 'Regular' and new_tier in ['Free', 'Bronze', 'Silver', 'Gold']:
+            if old_tier != new_tier:
+                new_fee = SUBSCRIPTION_PRICING.get(new_tier, Decimal('0'))
+                # (your existing balance check and deduction)
+                # after successfully updating:
+                previous_tier = old_tier or 'Free'
+                SubscriptionChange.objects.create(
+                    user=request.user,
+                    previous_tier=previous_tier,
+                    new_tier=new_tier,
+                )
 
         if new_role in ['Regular', 'Publisher', 'Writer']:
             profile.role = new_role
@@ -563,10 +609,16 @@ def checkout(request):
         })
 
     if request.method == 'POST':
-        ShoppingCart.objects.filter(user=request.user, checked_out=False).update(checked_out=True)
+        # mark all current cart items as checked out and timestamp them
+        ShoppingCart.objects.filter(
+            user=request.user,
+            checked_out=False
+        ).update(checked_out=True, checked_out_at=now())
         return redirect('mybooks')
     else:
-        cart_items = ShoppingCart.objects.filter(user=request.user, checked_out=False).select_related('book')
+        cart_items = ShoppingCart.objects.filter(
+            user=request.user, checked_out=False
+        ).select_related('book')
         total_price = sum(item.quantity * item.book.price for item in cart_items)
         for item in cart_items:
             item.book.pic_path = item.book.picture.url.split('/static/')[-1]

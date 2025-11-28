@@ -1,117 +1,385 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Available Books - Book Exchange{% endblock %}
+{% block title %}My History{% endblock %}
 
 {% block content %}
+<style>
+.history-container {
+   max-width: 1200px;
+   margin: 40px auto;
+   padding: 2.5rem 2rem;
+   background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+               radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+               rgba(15, 23, 42, 0.96);
+   border-radius: 20px;
+   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+   border: 1px solid rgba(148, 163, 184, 0.35);
+   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+   color: var(--text-primary);
+   backdrop-filter: blur(24px);
+}
 
-<div class="displaybooks-container" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+.badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   padding: 4px 12px;
+   border-radius: 999px;
+   border: 1px solid rgba(148, 163, 184, 0.5);
+   background: rgba(15, 23, 42, 0.9);
+   font-size: 11px;
+   text-transform: uppercase;
+   letter-spacing: 0.08em;
+   color: #9ca3af;
+   margin-bottom: 18px;
+}
 
-    <header class="page-header" style="margin-bottom: 2rem; text-align: center;">
-        <h1 style="font-weight: 800; font-size: 3rem; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); margin-bottom: 0.25rem; white-space: nowrap;">
-            Available Books
-        </h1>
-        <p style="color: var(--text-secondary); font-size: 1.15rem; font-weight: 500; margin-top: 0;">
-            Browse and add books to your cart seamlessly
-        </p>
-    </header>
+.badge-dot {
+   width: 8px;
+   height: 8px;
+   border-radius: 999px;
+   background: radial-gradient(circle at 30% 20%, #a5b4fc 0, #4f46e5 40%, #22c55e 100%);
+   box-shadow: 0 0 16px rgba(129, 140, 248, 0.9);
+}
 
-    <div class="card" style="background: var(--bg-secondary); padding: 2rem; border-radius: 14px; box-shadow: var(--shadow);">
-        <div class="table-controls" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem 2rem; margin-bottom: 1.5rem;">
-            <div class="search-control" style="position: relative; flex: 1 1 280px; max-width: 320px;">
-                <i class="fas fa-search" style="color: var(--text-tertiary); position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"></i>
-                <input type="text" placeholder="Search books..." id="bookSearch" style="width: 100%; padding: 12px 18px 12px 40px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem; outline: none; transition: border-color 0.25s ease;">
+.page-title {
+   font-weight: 700;
+   font-size: clamp(2rem, 3vw + 1rem, 2.8rem);
+   line-height: 1.05;
+   letter-spacing: -0.04em;
+   margin-bottom: 2rem;
+   background: linear-gradient(120deg, #60a5fa, #a855f7, #22c55e);
+   -webkit-background-clip: text;
+   color: transparent;
+}
+
+.section-title {
+   font-weight: 700;
+   font-size: 1.5rem;
+   color: var(--text-primary);
+   margin: 2.5rem 0 1.5rem 0;
+   padding-bottom: 0.5rem;
+   border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+}
+
+.cards-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+   gap: 1.8rem;
+   margin-top: 1.5rem;
+}
+
+.history-card {
+   background: rgba(15, 23, 42, 0.8);
+   border-radius: 16px;
+   padding: 1.8rem;
+   border: 1px solid rgba(148, 163, 184, 0.3);
+   box-shadow: 0 8px 25px rgba(15, 23, 42, 0.4);
+   transition: all 0.3s ease;
+   display: flex;
+   flex-direction: column;
+   height: fit-content;
+}
+
+.history-card:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 15px 35px rgba(15, 23, 42, 0.6);
+   border-color: rgba(96, 165, 250, 0.4);
+}
+
+.card-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: flex-start;
+   margin-bottom: 1.2rem;
+}
+
+.card-title {
+   font-weight: 600;
+   font-size: 1.25rem;
+   color: var(--text-primary);
+   margin: 0;
+   line-height: 1.3;
+   flex: 1;
+}
+
+.card-meta {
+   display: flex;
+   flex-direction: column;
+   gap: 0.6rem;
+}
+
+.meta-row {
+   display: flex;
+   align-items: center;
+   gap: 0.8rem;
+   font-size: 0.95rem;
+}
+
+.meta-label {
+   font-weight: 600;
+   color: var(--text-primary);
+   min-width: 80px;
+}
+
+.meta-value {
+   color: var(--text-secondary);
+}
+
+.exclusive-badge {
+   background: radial-gradient(circle at top left, #a855f7, #8b5cf6);
+   color: white;
+   padding: 6px 12px;
+   border-radius: 999px;
+   font-size: 0.8rem;
+   font-weight: 600;
+   display: inline-flex;
+   align-items: center;
+   gap: 5px;
+   margin-left: 12px;
+   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.tier-change-container {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   background: rgba(15, 23, 42, 0.6);
+   border-radius: 12px;
+   padding: 1rem;
+   margin: 0.8rem 0;
+   border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.tier-change {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   flex: 1;
+   justify-content: center;
+}
+
+.tier-badge {
+   padding: 8px 16px;
+   border-radius: 999px;
+   font-size: 0.85rem;
+   font-weight: 600;
+   text-transform: uppercase;
+   min-width: 80px;
+   text-align: center;
+}
+
+.tier-free {
+   background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+   color: var(--text-secondary);
+   border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.tier-bronze {
+   background: linear-gradient(135deg, #cd7f32, #b08d57);
+   color: white;
+   box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
+}
+
+.tier-silver {
+   background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+   color: white;
+   box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
+}
+
+.tier-gold {
+   background: linear-gradient(135deg, #ffd700, #daa520);
+   color: white;
+   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.change-arrow {
+   color: #60a5fa;
+   font-weight: bold;
+   font-size: 1.2rem;
+}
+
+.empty-state {
+   text-align: center;
+   padding: 4rem 2rem;
+   color: var(--text-secondary);
+   font-style: italic;
+   grid-column: 1 / -1;
+}
+
+.empty-state-icon {
+   font-size: 3.5rem;
+   margin-bottom: 1.5rem;
+   opacity: 0.5;
+}
+
+.empty-state p {
+   font-size: 1.1rem;
+   margin: 0;
+}
+
+/* Light mode adjustments */
+body.light-mode .history-container {
+   background: rgba(255, 255, 255, 0.85);
+   border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+body.light-mode .badge {
+   background: rgba(255, 255, 255, 0.9);
+   border: 1px solid rgba(226, 232, 240, 0.8);
+   color: #718096;
+}
+
+body.light-mode .history-card {
+   background: rgba(255, 255, 255, 0.8);
+   border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+body.light-mode .tier-change-container {
+   background: rgba(255, 255, 255, 0.6);
+   border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+   .history-container {
+     margin: 2rem 1rem;
+     padding: 2rem 1.5rem;
+   }
+
+   .cards-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .card-header {
+     flex-direction: column;
+     gap: 1rem;
+   }
+
+   .exclusive-badge {
+     margin-left: 0;
+     align-self: flex-start;
+   }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+   .cards-grid {
+     grid-template-columns: repeat(2, 1fr);
+   }
+}
+
+@media (min-width: 1101px) {
+   .cards-grid {
+     grid-template-columns: repeat(3, 1fr);
+   }
+}
+</style>
+
+<div class="history-container">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    <span>Purchase & Subscription History</span>
+  </div>
+
+  <h1 class="page-title">My History</h1>
+
+  <!-- Books purchase history -->
+  <section class="mb-5">
+    <h2 class="section-title">
+      <i class="fas fa-book"></i>
+      Book Purchases
+    </h2>
+
+    {% if purchases %}
+      <div class="cards-grid">
+        {% for p in purchases %}
+          <div class="history-card">
+            <div class="card-header">
+              <h4 class="card-title">{{ p.title }}</h4>
+              {% if p.is_exclusive %}
+                <span class="exclusive-badge">
+                  <i class="fas fa-crown"></i>
+                  Exclusive
+                </span>
+              {% endif %}
             </div>
-            <div class="results-count" style="color: var(--text-secondary); font-size: 1rem; font-weight: 600; flex: 0 0 auto;">
-                {{ books|length }} book{{ books|length|pluralize }} available
+            <div class="card-meta">
+              <div class="meta-row">
+                <span class="meta-label">Quantity:</span>
+                <span class="meta-value">{{ p.quantity }}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Purchased:</span>
+                <span class="meta-value">
+                  {% if p.purchased_at %}
+                    {{ p.purchased_at|date:"M d, Y H:i" }}
+                  {% else %}
+                    (time not recorded)
+                  {% endif %}
+                </span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Price:</span>
+                <span class="meta-value">
+                  {% if p.price %}
+                    ${{ p.price }}
+                  {% else %}
+                    Not available
+                  {% endif %}
+                </span>
+              </div>
             </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fas fa-book-open"></i>
         </div>
+        <p>You have not purchased any books yet.</p>
+      </div>
+    {% endif %}
+  </section>
 
-        <div class="table-wrap" style="overflow-x: auto;">
-            <table class="book-table" aria-label="Books Available for Exchange" style="width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; table-layout: fixed;">
-                <thead>
-                    <tr style="background: var(--bg-primary); border-bottom: 3px solid var(--border);">
-                        <th style="padding: 16px 20px; text-align: left; font-weight: 700; color: var(--primary); border-radius: 12px 0 0 12px;">Book Name</th>
-                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Price</th>
-                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center;">Posted By</th>
-                        <th style="padding: 16px 20px; font-weight: 700; color: var(--primary); text-align: center; border-radius: 0 12px 12px 0;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for book in books %}
-                    <tr class="book-row" style="background: var(--bg-secondary); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease; border-radius: 12px; cursor: pointer;">
-                        <td style="padding: 16px 20px; vertical-align: middle;">
-                            <a href="{% url 'book_detail' book.id %}" class="book-link" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px;">
-                                <i class="fas fa-book book-icon" style="color: var(--text-tertiary); font-size: 1.25rem;"></i>
-                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ book.name }}</span>
-                            </a>
-                        </td>
-                        <td class="price" style="padding: 16px 20px; text-align: center; font-weight: 700; vertical-align: middle;">${{ book.price }}</td>
-                        <td class="posted-by" style="padding: 16px 20px; color: var(--text-secondary); text-align: center; vertical-align: middle;">{{ book.username }}</td>
-                        <td style="padding: 16px 20px; text-align: center; vertical-align: middle;">
-                            <a href="{% url 'add_to_cart' book.id %}" class="add-to-cart-btn"
-                               style="background-color: #28a745;
-                                      color: white;
-                                      padding: 12px 24px;
-                                      border-radius: 14px;
-                                      font-weight: 700;
-                                      text-decoration: none;
-                                      box-shadow: 0 6px 15px rgba(40, 167, 69, 0.6);
-                                      display: inline-flex;
-                                      align-items: center;
-                                      gap: 10px;
-                                      transition: background-color 0.3s ease, box-shadow 0.3s ease;">
-                                <i class="fas fa-cart-plus"></i> Add to Cart
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" style="padding: 24px; text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.1rem;">
-                            <i class="fas fa-book-open" style="margin-right: 10px;"></i> No books available at the moment.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+  <!-- Subscription history -->
+  <section class="mb-5">
+    <h2 class="section-title">
+      <i class="fas fa-id-card"></i>
+      Subscription Changes
+    </h2>
+
+    {% if subscription_events %}
+      <div class="cards-grid">
+        {% for s in subscription_events %}
+          <div class="history-card">
+            <div class="card-header">
+              <h4 class="card-title">Subscription Update</h4>
+              <span class="meta-value">{{ s.changed_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="tier-change-container">
+              <div class="tier-change">
+                <span class="tier-badge tier-{{ s.previous_tier|lower }}">{{ s.previous_tier }}</span>
+                <span class="change-arrow">→</span>
+                <span class="tier-badge tier-{{ s.new_tier|lower }}">{{ s.new_tier }}</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Time:</span>
+              <span class="meta-value">{{ s.changed_at|date:"H:i" }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fas fa-id-card-alt"></i>
         </div>
-
-        {% if books.has_other_pages %}
-        <nav class="pagination" aria-label="Pagination navigation" style="display: flex; justify-content: center; gap: 16px; margin-top: 24px;">
-            {% if books.has_previous %}
-                <a href="?page={{ books.previous_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-            {% endif %}
-
-            <span class="page-info" style="line-height: 38px; color: var(--text-secondary); font-weight: 600; font-size: 1rem;">
-                Page {{ books.number }} of {{ books.paginator.num_pages }}
-            </span>
-
-            {% if books.has_next %}
-                <a href="?page={{ books.next_page_number }}" class="page-btn" style="padding: 10px 15px; border-radius: 8px; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); text-decoration: none;">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            {% endif %}
-        </nav>
-        {% endif %}
-    </div>
+        <p>No subscription changes recorded yet.</p>
+      </div>
+    {% endif %}
+  </section>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('bookSearch');
-    const bookRows = document.querySelectorAll('.book-row');
-
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-
-        bookRows.forEach(row => {
-            const bookName = row.querySelector('.book-link').textContent.toLowerCase();
-            row.style.display = bookName.includes(searchTerm) ? '' : 'none';
-        });
-    });
-});
-</script>
-
 {% endblock %}
