@@ -69,12 +69,19 @@ def postbook(request):
         'item_list': MainMenu.objects.all(),
     })
 
-@login_required
+
 def displaybooks(request):
     """
     Show user's purchase history and subscription history
     in a recipe-card style layout.
     """
+    # Check if user is logged in
+    if not request.user.is_authenticated:
+        return render(request, 'bookMng/login_required.html', {
+            'message': 'You need to log in to view your purchase history.',
+            'item_list': MainMenu.objects.all(),
+        })
+
     # All checked-out cart rows for this user (each row = a "purchase event")
     purchased_items = (
         ShoppingCart.objects
