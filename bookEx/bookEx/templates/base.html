@@ -96,10 +96,31 @@
       filter: drop-shadow(0 1px 2px var(--primary));
     }
 
+    nav {
+      position: relative;
+      flex: 1;
+      margin: 0 1.5rem;
+    }
+
     nav ul {
       display: flex;
       list-style: none;
       gap: 2.1rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) transparent;
+      padding-bottom: 4px;
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    nav ul::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav ul li {
+      flex-shrink: 0;
     }
 
     nav ul li a {
@@ -107,10 +128,12 @@
       color: var(--text-secondary);
       font-size: 1rem;
       font-weight: 600;
-      padding: 7px 2px;
+      padding: 7px 12px;
       position: relative;
       border-radius: 6px;
       transition: color 0.22s, background 0.18s;
+      white-space: nowrap;
+      display: block;
     }
 
     nav ul li a:hover,
@@ -122,8 +145,8 @@
     nav ul li a.active::after {
       content: "";
       position: absolute;
-      bottom: -3.5px; left: 7px;
-      width: 70%;
+      bottom: -3.5px; left: 12px;
+      width: calc(100% - 24px);
       height: 3px;
       background: linear-gradient(90deg, var(--primary) 57%, var(--accent) 100%);
       border-radius: 10px;
@@ -190,17 +213,74 @@
       font-weight: 600;
     }
 
+    /* Navigation scroll indicators */
+    .nav-scroll-indicator {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .nav-scroll-indicator.left {
+      left: 0;
+      background: linear-gradient(to right, var(--glass-bg) 0%, transparent 100%);
+    }
+
+    .nav-scroll-indicator.right {
+      right: 0;
+      background: linear-gradient(to left, var(--glass-bg) 0%, transparent 100%);
+    }
+
+    .nav-scroll-indicator.visible {
+      opacity: 1;
+    }
+
+    .nav-scroll-indicator i {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 1024px) {
+      header {
+        padding: 1.2rem 1.5rem;
+      }
+
+      nav ul {
+        gap: 1.5rem;
+      }
+    }
+
     @media (max-width: 800px) {
       header {
         flex-direction: column;
         gap: 14px;
         padding: 1.3rem 1rem;
       }
+
+      nav {
+        margin: 0;
+        width: 100%;
+        position: relative;
+      }
+
       nav ul {
         gap: 1.2rem;
-        flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
+        padding: 0 8px 4px;
       }
+
+      .user-actions {
+        justify-content: center;
+        width: 100%;
+      }
+
       main {
         padding: 2.4rem 0.7rem;
         max-width: 98vw;
@@ -208,11 +288,60 @@
     }
 
     @media (max-width: 500px) {
-      .logo {font-size: 1.3rem;}
-      header {padding: 11px 2vw;}
-      nav ul {gap: 0.6rem;}
-      .user-actions a, .user-actions button {padding: 0.52rem 1rem;font-size: 0.95rem;}
-      main {padding: 1rem 2vw;}
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .logo i {
+        font-size: 1.5rem;
+      }
+
+      header {
+        padding: 11px 2vw;
+      }
+
+      nav ul {
+        gap: 0.8rem;
+      }
+
+      nav ul li a {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+      }
+
+      .user-actions a,
+      .user-actions button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+      }
+
+      .user-actions span {
+        font-size: 0.9rem;
+      }
+
+      main {
+        padding: 1rem 2vw;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .logo {
+        font-size: 1.3rem;
+      }
+
+      .logo i {
+        font-size: 1.3rem;
+      }
+
+      nav ul li a {
+        font-size: 0.85rem;
+        padding: 5px 8px;
+      }
+
+      .user-actions {
+        flex-direction: column;
+        gap: 0.7rem;
+      }
     }
 
     /* Light mode colors */
@@ -355,6 +484,9 @@
     <span>Book Exchange</span>
   </div>
   <nav>
+    <div class="nav-scroll-indicator left">
+      <i class="fas fa-chevron-left"></i>
+    </div>
     <ul>
       <li>
         <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
@@ -383,6 +515,9 @@
       </li>
       {% endif %}
     </ul>
+    <div class="nav-scroll-indicator right">
+      <i class="fas fa-chevron-right"></i>
+    </div>
   </nav>
   <div class="user-actions">
     {% if user.is_authenticated %}
@@ -478,6 +613,47 @@ function appendMessage(sender, message, isTyping) {
   container.appendChild(msgDiv);
   container.scrollTop = container.scrollHeight;
 }
+
+// Navigation scroll indicators
+function updateNavScrollIndicators() {
+  const nav = document.querySelector('nav');
+  const ul = nav.querySelector('ul');
+  const leftIndicator = nav.querySelector('.nav-scroll-indicator.left');
+  const rightIndicator = nav.querySelector('.nav-scroll-indicator.right');
+
+  // Check if we can scroll horizontally
+  if (ul.scrollWidth > ul.clientWidth) {
+    // Show/hide left indicator based on scroll position
+    if (ul.scrollLeft > 0) {
+      leftIndicator.classList.add('visible');
+    } else {
+      leftIndicator.classList.remove('visible');
+    }
+
+    // Show/hide right indicator based on scroll position
+    if (ul.scrollLeft < (ul.scrollWidth - ul.clientWidth)) {
+      rightIndicator.classList.add('visible');
+    } else {
+      rightIndicator.classList.remove('visible');
+    }
+  } else {
+    // Hide both indicators if no scrolling is needed
+    leftIndicator.classList.remove('visible');
+    rightIndicator.classList.remove('visible');
+  }
+}
+
+// Initialize scroll indicators and add scroll event listener
+document.addEventListener('DOMContentLoaded', function() {
+  const navUl = document.querySelector('nav ul');
+  if (navUl) {
+    updateNavScrollIndicators();
+    navUl.addEventListener('scroll', updateNavScrollIndicators);
+
+    // Also update on window resize
+    window.addEventListener('resize', updateNavScrollIndicators);
+  }
+});
 </script>
 
 <footer style="padding: 2rem 0; display: flex; justify-content: center; align-items: center; gap: 20px;">
