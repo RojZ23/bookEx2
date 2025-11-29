@@ -320,9 +320,9 @@
       <span>Premium Collection</span>
     </div>
 
-    <h1 class="page-title">Exclusive Books for Supporters</h1>
+    <h1 class="page-title" style="  -webkit-text-stroke: 1px black;">Exclusive Books for Supporters</h1>
 
-    <p class="page-subtitle">
+    <p class="page-subtitle" style="      -webkit-text-stroke: 0.2px black;">
       Discover premium content available only to our valued supporters and writers.
       Upgrade your subscription to unlock more exclusive books.
     </p>
@@ -392,8 +392,8 @@
     </div>
   {% else %}
     <div class="empty-state">
-      <i class="fas fa-book-open empty-icon"></i>
-      <p>No exclusive books available yet.</p>
+      <i class="fas fa-book-open empty-icon" style="      -webkit-text-stroke: 1px black;"></i>
+      <p style="      -webkit-text-stroke: 0.2px black;">No exclusive books available yet.</p>
       {% if is_writer %}
         <p style="margin-top: 1rem;">Be the first to post an exclusive book!</p>
         <a href="{% url 'post_exclusive_book' %}" class="btn-premium" style="margin-top: 1.5rem;">
@@ -401,7 +401,7 @@
           Post Your First Exclusive Book
         </a>
       {% else %}
-        <p style="margin-top: 1rem;">Check back later for premium content.</p>
+        <p style="margin-top: 1rem;       -webkit-text-stroke: 0.2px black;">Check back later for premium content.</p>
       {% endif %}
     </div>
   {% endif %}
